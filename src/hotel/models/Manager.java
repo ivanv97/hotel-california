@@ -1,5 +1,7 @@
 package hotel.models;
 
+import customexceptions.InvalidChangeRoomStatusException;
+
 public class Manager {
 	private Hotel hotel;
 	private String name;
@@ -37,14 +39,18 @@ public class Manager {
 	 * a room by its number in order to book it
 	 *
 	 * @param number number of the room
-	 * @return <CODE>true</CODE>  if the room is successfully booked
-	 * or <CODE>false</CODE> if the room number is invalid or room is occupied
+	 * @throws InvalidChangeRoomStatusException Throws exception if the desired room is booked
+	 *                                          or if there is no room with that number
 	 */
-	public boolean bookRoom(int number) {
-		for (Room room : hotel.getRooms())
-			if (room.getNumber() == number)
-				return room.book();
-		return false;
+	public void bookRoom(int number) throws InvalidChangeRoomStatusException {
+		for (Room room : hotel.getRooms()) {
+			if (room.getNumber() == number) {
+				if (!room.changeRoomStatus(true)) {
+					throw new InvalidChangeRoomStatusException("The room is already booked!");
+				}
+			}
+		}
+		throw new InvalidChangeRoomStatusException("No room with that number!");
 	}
 
 	/**
@@ -52,14 +58,16 @@ public class Manager {
 	 * for free rooms by iterating through all
 	 * of the rooms and book the first vacant one
 	 *
-	 * @return <CODE>true</CODE> if there is a free room or
-	 * <CODE>false</CODE> if there are no free rooms
+	 * @throws InvalidChangeRoomStatusException throws custom exception if there are
+	 *                                          no free rooms
 	 */
-	public boolean checkForFreeRooms() {
-		for (Room room : hotel.getRooms())
-			if (room.book())
-				return true;
-		return false;
+	public void checkAndBookFirstFreeRoom() throws InvalidChangeRoomStatusException {
+		for (Room room : hotel.getRooms()) {
+			if (room.changeRoomStatus(true)) {
+				return;
+			}
+		}
+		throw new InvalidChangeRoomStatusException("There are no free rooms!");
 	}
 
 	/**
@@ -67,8 +75,10 @@ public class Manager {
 	 * the freeRoom method of each room object
 	 */
 	public void clearBookings() {
-		for (Room room : hotel.getRooms())
-			room.freeRoom();
+		for (Room room : hotel.getRooms()) {
+			if (room.checkIfBooked()) {
+				room.changeRoomStatus(false);
+			}
+		}
 	}
-
 }

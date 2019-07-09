@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Hotel {
 	private String name;
 	private ArrayList<Room> rooms;
+	private static final ArrayList<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
 
 	/**
 	 * Only constructor of the Hotel class
@@ -16,7 +17,6 @@ public class Hotel {
 		this.name = name;
 		this.rooms = rooms;
 	}
-
 
 	public String getName() {
 		return name;
@@ -36,4 +36,7 @@ public class Hotel {
 		return rooms;
 	}
 
+	public static ArrayList<Integer> getTakenRoomNumbers() {
+		return TAKEN_ROOM_NUMBERS;
+	}
 }

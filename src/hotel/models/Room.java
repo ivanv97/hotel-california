@@ -1,11 +1,9 @@
 package hotel.models;
 
-import java.util.ArrayList;
 
 public class Room {
 	private int number;
 	private boolean isBooked;
-	private static ArrayList<Integer> numbersTaken = new ArrayList<>();
 
 	/**
 	 * Only constructor of the Room class
@@ -25,9 +23,9 @@ public class Room {
 	 * @param number number of the room to be set
 	 */
 	public void setNumber(int number) {
-		if (!numbersTaken.contains(number)) {
+		if (!Hotel.getTakenRoomNumbers().contains(number)) {
 			this.number = number;
-			numbersTaken.add(number);
+			Hotel.getTakenRoomNumbers().add(number);
 		}
 	}
 
@@ -36,29 +34,19 @@ public class Room {
 	}
 
 	/**
-	 * Books a room if it is not already booked
+	 * Method which changes the status of the room
 	 *
-	 * @return <CODE>true</CODE> if the room is successfully booked
-	 * or <CODE>false</CODE> if the room is already booked
+	 * @param isBooked boolean parameter - true if we want to book the room
+	 *                 false if we want to free the room
+	 * @return <CODE>true</CODE> if the action is successful
+	 * <CODE>false</CODE> otherwise
 	 */
-	public boolean book() {
-		if (isBooked)
-			return false;
-		isBooked = true;
-		return true;
-	}
-
-	/**
-	 * Clears the booking of the room
-	 *
-	 * @return <CODE>false</CODE> if the room is already vacant
-	 * or <CODE>true</CODE> if the room booking is cleared
-	 */
-	public boolean freeRoom() {
-		if (!isBooked)
-			return false;
-		isBooked = false;
-		return true;
+	public boolean changeRoomStatus(boolean isBooked) {
+		if (this.isBooked != isBooked) {
+			this.isBooked = isBooked;
+			return true;
+		}
+		return false;
 	}
 
 	/**
