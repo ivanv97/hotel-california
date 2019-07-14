@@ -10,8 +10,8 @@ public class Booking {
 	private final int bookingNumber;
 	private LocalDate fromDate;
 	private LocalDate toDate;
-	String guestName;
-	int guestId;
+	private String guestName;
+	private final long guestId;
 
 
 	/**
@@ -24,9 +24,9 @@ public class Booking {
 	 * @throws InvalidHotelActionException throws custom exception if any of the
 	 *                                     passed arguments is not valid for object creation
 	 */
-	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, int guestId)
+	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId)
 		throws InvalidHotelActionException {
-		if (fromDate != null && toDate != null && guestName != null && Integer.toString(guestId).length() != 10) {
+		if (fromDate != null && toDate != null && guestName != null && guestId/1000000000L >= 1) {
 			changeReservationDates(fromDate, toDate);
 			this.guestName = guestName;
 			this.guestId = guestId;
@@ -52,12 +52,8 @@ public class Booking {
 		this.guestName = guestName;
 	}
 
-	public int getGuestId() {
+	public long getGuestId() {
 		return guestId;
-	}
-
-	public void setGuestId(int guestId) {
-		this.guestId = guestId;
 	}
 
 	public int getBookingNumber() {

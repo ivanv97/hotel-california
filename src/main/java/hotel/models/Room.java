@@ -5,13 +5,17 @@ import hotel.commodities.AbstractCommodity;
 import hotel.commodities.Bed;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Room {
 	private int number;
 	private Set<AbstractCommodity> commodities;
+
+	public Set<LocalDate> getMaintenanceDates() {
+		return maintenanceDates;
+	}
+
 	private Set<LocalDate> maintenanceDates;
 	private Set<Booking> bookings;
 
@@ -23,9 +27,13 @@ public class Room {
 	 * @param number      room number
 	 * @param commodities The commodities belonging to the room
 	 */
-	public Room(int number, Set<AbstractCommodity> commodities) {
+	public Room(int number, Set<AbstractCommodity> commodities){
+		if(commodities == null){
+			this.commodities = new HashSet<>();
+		} else{
+			this.commodities = commodities;
+		}
 		setNumber(number);
-		this.commodities = commodities;
 		maintenanceDates = new HashSet<>();
 		bookings = new HashSet<>();
 	}
@@ -82,7 +90,7 @@ public class Room {
 	 * @throws InvalidHotelActionException if the specified interval intervenes with
 	 *                                     already created bookings
 	 */
-	public void createBooking(LocalDate fromDate, LocalDate toDate, String guestName, int guestId)
+	public void createBooking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId)
 		throws InvalidHotelActionException {
 		if (!checkIfBooked(fromDate, toDate)) {
 			bookings.add(new Booking(fromDate, toDate, guestName, guestId));
@@ -124,6 +132,9 @@ public class Room {
 	 * false if it is vacant
 	 */
 	public boolean checkIfBooked(LocalDate fromDate, LocalDate toDate) {
+		if(bookings.isEmpty()){
+			return false;
+		}
 		for (Booking booking : bookings) {
 			if ((fromDate.isAfter(booking.getFromDate()) && fromDate.isBefore(booking.getToDate()))
 				|| (toDate.isAfter(booking.getFromDate()) && toDate.isBefore((booking.getToDate())))
@@ -144,7 +155,7 @@ public class Room {
 	 * found
 	 */
 
-	public ArrayList<LocalDate> findAvailableDatesForIntervalAndSize(LocalDate fromDate, LocalDate toDate, int numberOfBeds) {
+	public List<LocalDate> findAvailableDatesForIntervalAndSize(LocalDate fromDate, LocalDate toDate, int numberOfBeds) {
 		int currentNumberOfBeds = 0;
 		for (AbstractCommodity commodity : commodities) {
 			if (commodity instanceof Bed) {
@@ -154,9 +165,15 @@ public class Room {
 		if (currentNumberOfBeds != numberOfBeds) {
 			return new ArrayList<>();
 		}
+		if (bookings.isEmpty()) {
+			List<LocalDate> allDates = fromDate.datesUntil(toDate).collect(Collectors.toList());
+			allDates.add(toDate);
+			return allDates;
+		}
 		ArrayList<LocalDate> availableDates = new ArrayList<>();
 		for (Booking booking : bookings) {
-			for (LocalDate currentDate = fromDate; currentDate.equals(toDate); currentDate.plusDays(1)) {
+			for (LocalDate currentDate = fromDate; !currentDate.isAfter(toDate);
+				 currentDate = LocalDate.of(currentDate.getYear(),currentDate.getMonth(),currentDate.getDayOfMonth() + 1)) {
 				if (currentDate.isAfter(booking.getToDate()) || currentDate.isBefore(booking.getFromDate())) {
 					availableDates.add(currentDate);
 				} else {

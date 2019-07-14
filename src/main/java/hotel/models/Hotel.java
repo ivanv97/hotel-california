@@ -51,14 +51,14 @@ public class Hotel {
 	 * @throws InvalidHotelActionException if the number of days does not
 	 *                                     correspond with the specified interval
 	 */
-	public HashMap<Room, ArrayList<LocalDate>> getFreeRoomsAndDates(LocalDate fromDate, LocalDate toDate, int numberOfDays, int numberOfBeds)
+	public HashMap<Room, List<LocalDate>> getFreeRoomsAndDates(LocalDate fromDate, LocalDate toDate, int numberOfDays, int numberOfBeds)
 		throws InvalidHotelActionException {
 		if (numberOfDays != (toDate.getDayOfYear() - fromDate.getDayOfYear())) {
 			throw new InvalidHotelActionException("Number of days does not correspond with selected dates!");
 		}
-		HashMap<Room, ArrayList<LocalDate>> availableRooms = new HashMap<>();
+		HashMap<Room, List<LocalDate>> availableRooms = new HashMap<>();
 		for (Room room : rooms) {
-			ArrayList<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(fromDate, toDate, numberOfBeds);
+			List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(fromDate, toDate, numberOfBeds);
 			if (!availableDates.isEmpty()) {
 				availableRooms.put(room, availableDates);
 			}

@@ -4,6 +4,7 @@ import customexceptions.InvalidHotelActionException;
 import hotel.commodities.*;
 import hotel.models.*;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -33,12 +34,14 @@ public class HotelServiceApplication {
 		Manager manager = new Manager("Ivan Velkushanov");
 		manager.setHotel(hotel);
 
+		HashMap<Room, List<LocalDate>> availableRoomsAndDates = null;
 		try {
-			manager.getHotel().getFreeRoomsAndDates(LocalDate.of(2019, 07, 20),
+			availableRoomsAndDates = manager.getHotel().getFreeRoomsAndDates(LocalDate.of(2019, 07, 20),
 				LocalDate.of(2019, 7, 25), 5, 2);
 		} catch (InvalidHotelActionException e) {
 			e.printStackTrace();
 		}
+		System.out.println(availableRoomsAndDates);
 	}
 }
 
