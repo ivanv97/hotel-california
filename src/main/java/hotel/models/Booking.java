@@ -68,7 +68,7 @@ public class Booking {
 	 * @param toDate   the new final date
 	 */
 	public void changeReservationDates(LocalDate fromDate, LocalDate toDate) {
-		if (toDate.isAfter(fromDate)) {
+		if (!toDate.isBefore(fromDate)) {
 			this.fromDate = fromDate;
 			this.toDate = toDate;
 		}
