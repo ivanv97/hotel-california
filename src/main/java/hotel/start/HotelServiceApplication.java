@@ -29,13 +29,18 @@ public class HotelServiceApplication {
 		thirdRoomCommodities.add(new Toilet());
 		thirdRoomCommodities.add(new Shower());
 
-		Hotel hotel = new Hotel("California", new ArrayList<>(Arrays.asList(new Room(101, firstRoomCommodities),
-			new Room(102, secondRoomCommodities), new Room(103, thirdRoomCommodities))));
+		Room room1 = new Room(101, firstRoomCommodities);
+		Room room2 = new Room(102, secondRoomCommodities);
+		Room room3 = new Room(103, thirdRoomCommodities);
+
+		Hotel hotel = new Hotel("California", new ArrayList<>(Arrays.asList(room1, room2, room3)));
 		Manager manager = new Manager("Ivan Velkushanov");
 		manager.setHotel(hotel);
 
-		HashMap<Room, List<LocalDate>> availableRoomsAndDates = null;
+		Map<Room, List<LocalDate>> availableRoomsAndDates = null;
 		try {
+			room3.createBooking(LocalDate.of(2019,07,20),
+				LocalDate.of(2019,07,22),"Ivan",1234567895L);
 			availableRoomsAndDates = manager.getHotel().getFreeRoomsAndDates(LocalDate.of(2019, 07, 20),
 				LocalDate.of(2019, 7, 25), 5, 2);
 		} catch (InvalidHotelActionException e) {

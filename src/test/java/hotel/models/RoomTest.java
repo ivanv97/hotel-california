@@ -25,7 +25,7 @@ class RoomTest {
 
 	@AfterEach
 	void tearDown() {
-		room = null;
+		Hotel.getTakenRoomNumbers().clear();
 	}
 
 	/**
@@ -173,8 +173,8 @@ class RoomTest {
 		LocalDate endDate = LocalDate.of(2020, 9, 15);
 		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(LocalDate.of(2020, 9, 10),
 			endDate, 1);
-		assertTrue(availableDates.contains(endDate)
-			&& availableDates.size() == 1);
+		assertTrue(availableDates.contains(endDate) && availableDates.contains(LocalDate.of(2020, 9, 14))
+			&& availableDates.size() == 2);
 	}
 
 	/**
@@ -182,7 +182,7 @@ class RoomTest {
 	 */
 	@Test
 	void hashCodeShouldBeDifferent() {
-		Room room2 = new Room(103,null);
+		Room room2 = new Room(103, null);
 		assertNotEquals(room.hashCode(), room2.hashCode());
 	}
 
@@ -193,7 +193,7 @@ class RoomTest {
 	}
 
 	@Test
-	void equalsShouldReturnFalseWhenComparingWithNullOrOtherType(){
+	void equalsShouldReturnFalseWhenComparingWithNullOrOtherType() {
 		assertFalse(room.equals(null));
 		assertFalse(room.equals("room"));
 	}

@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class Hotel {
-	private static final ArrayList<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
+	private static final List<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
 	private String name;
 	private List<Room> rooms;
 
@@ -33,7 +33,7 @@ public class Hotel {
 		return rooms;
 	}
 
-	public static ArrayList<Integer> getTakenRoomNumbers() {
+	public static List<Integer> getTakenRoomNumbers() {
 		return TAKEN_ROOM_NUMBERS;
 	}
 
@@ -51,12 +51,13 @@ public class Hotel {
 	 * @throws InvalidHotelActionException if the number of days does not
 	 *                                     correspond with the specified interval
 	 */
-	public HashMap<Room, List<LocalDate>> getFreeRoomsAndDates(LocalDate fromDate, LocalDate toDate, int numberOfDays, int numberOfBeds)
+	public Map<Room, List<LocalDate>> getFreeRoomsAndDates(LocalDate fromDate, LocalDate toDate,
+															   int numberOfDays, int numberOfBeds)
 		throws InvalidHotelActionException {
 		if (numberOfDays != (toDate.getDayOfYear() - fromDate.getDayOfYear())) {
 			throw new InvalidHotelActionException("Number of days does not correspond with selected dates!");
 		}
-		HashMap<Room, List<LocalDate>> availableRooms = new HashMap<>();
+		Map<Room, List<LocalDate>> availableRooms = new HashMap<>();
 		for (Room room : rooms) {
 			List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(fromDate, toDate, numberOfBeds);
 			if (!availableDates.isEmpty()) {

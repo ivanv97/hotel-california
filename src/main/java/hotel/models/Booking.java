@@ -6,7 +6,7 @@ import java.awt.print.Book;
 import java.time.LocalDate;
 
 public class Booking {
-	private static int lastNumberUsed = 0;
+	private static int lastNumberUsed;
 	private final int bookingNumber;
 	private LocalDate fromDate;
 	private LocalDate toDate;
@@ -62,13 +62,13 @@ public class Booking {
 
 	/**
 	 * Changes the reservation dates of the booking
-	 * first checks if fromDate is before or equal to toDate
+	 * first checks if fromDate is before toDate
 	 *
 	 * @param fromDate the new beginning date
 	 * @param toDate   the new final date
 	 */
 	public void changeReservationDates(LocalDate fromDate, LocalDate toDate) {
-		if (!fromDate.isAfter(toDate)) {
+		if (toDate.isAfter(fromDate)) {
 			this.fromDate = fromDate;
 			this.toDate = toDate;
 		}
@@ -85,6 +85,8 @@ public class Booking {
 			return false;
 		}
 		Booking booking = (Booking) object;
-		return this.bookingNumber == booking.getBookingNumber();
+		return this.bookingNumber == booking.getBookingNumber()
+			&& this.fromDate.equals(booking.getFromDate())
+			&& this.toDate.equals(booking.getToDate());
 	}
 }

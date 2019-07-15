@@ -38,7 +38,7 @@ class BookingTest {
 	}
 
 	/**
-	 * Test passes if reservatons dates are
+	 * Test passes if reservations dates are
 	 * successfully changed when chronological
 	 * First date is before the second
 	 */

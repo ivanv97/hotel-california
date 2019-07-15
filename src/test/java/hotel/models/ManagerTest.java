@@ -13,6 +13,13 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ManagerTest {
+
+	/**
+	 * Creating three rooms with different types
+	 * and number of commodities and try to create
+	 * booking with different date intervals
+	 * and size of room
+	 */
 	@Test
 	void bookThreeRooms() {
 		//one bed
@@ -43,7 +50,7 @@ class ManagerTest {
 		manager.setHotel(hotel);
 
 		try {
-			HashMap<Room, List<LocalDate>> availableRoomsAndDates = manager.getHotel().getFreeRoomsAndDates(
+			Map<Room, List<LocalDate>> availableRoomsAndDates = manager.getHotel().getFreeRoomsAndDates(
 				LocalDate.of(2019, 7, 20),
 				LocalDate.of(2019, 7, 25), 5, 2);
 			for (Room room : availableRoomsAndDates.keySet()) {

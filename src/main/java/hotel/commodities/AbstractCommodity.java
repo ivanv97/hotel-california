@@ -1,7 +1,7 @@
 package hotel.commodities;
 
 public abstract class AbstractCommodity {
-	public static int lastNumberUsed = 0;
+	public static int lastNumberUsed;
 	public final int inventoryNumber;
 
 	public AbstractCommodity() {
