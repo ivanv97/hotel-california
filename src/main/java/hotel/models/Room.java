@@ -8,6 +8,13 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Room class - provides basis
+ * for creating a room with commodities,
+ * dates on which it was under maintenance
+ * and current bookings
+ * @author Ivan Velkushanov
+ */
 public class Room {
 	private int number;
 	private Set<AbstractCommodity> commodities;
@@ -182,7 +189,7 @@ public class Room {
 		//Add or remove it to the final list if it
 		//Satisfies the condition - is after or equal to the booking final date
 		//Is before the booking start date
-		ArrayList<LocalDate> availableDates = new ArrayList<>();
+		List<LocalDate> availableDates = new ArrayList<>();
 		for (Booking booking : bookings) {
 			for (LocalDate currentDate = fromDate; !currentDate.isAfter(toDate); currentDate = currentDate.plusDays(1)) {
 				if (currentDate.equals(booking.getToDate()) || currentDate.isAfter(booking.getToDate())

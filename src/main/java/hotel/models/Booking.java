@@ -2,9 +2,15 @@ package hotel.models;
 
 import customexceptions.InvalidHotelActionException;
 
-import java.awt.print.Book;
 import java.time.LocalDate;
 
+/**
+ * This class serves as property
+ * of each Room object - it allows
+ * reservation dates to be updated and
+ * it can be added to set
+ * @author Ivan Velkushanov
+ */
 public class Booking {
 	private static int lastNumberUsed;
 	private final int bookingNumber;
@@ -12,7 +18,6 @@ public class Booking {
 	private LocalDate toDate;
 	private String guestName;
 	private final long guestId;
-
 
 	/**
 	 * Constructor of the Booking class
@@ -26,7 +31,7 @@ public class Booking {
 	 */
 	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId)
 		throws InvalidHotelActionException {
-		if (fromDate != null && toDate != null && guestName != null && guestId/1000000000L >= 1) {
+		if (fromDate != null && toDate != null && guestName != null && guestId/1_000_000_000L >= 1) {
 			changeReservationDates(fromDate, toDate);
 			this.guestName = guestName;
 			this.guestId = guestId;
@@ -74,11 +79,23 @@ public class Booking {
 		}
 	}
 
+	/**
+	 * The hashCode method is overriden
+	 * to return the booking's number which is unique
+	 * @return bookingNumber
+	 */
 	@Override
 	public int hashCode() {
 		return bookingNumber;
 	}
 
+	/**
+	 * Two booking objects are equal
+	 * if their booking numbers and dates are equal
+	 * @param object booking object to compare with
+	 * @return true - if the bookings are equal
+	 * false if comparing with null or other type
+	 */
 	@Override
 	public boolean equals(Object object) {
 		if (!(object instanceof Booking)) {

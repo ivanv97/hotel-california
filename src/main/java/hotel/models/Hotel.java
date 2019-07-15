@@ -5,6 +5,13 @@ import customexceptions.InvalidHotelActionException;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * Hotel class - consists of
+ * name as list of Room objects
+ * Implements logic for finding available rooms
+ * for particular dates and number of people
+ * @author Ivan Velkushanov
+ */
 public class Hotel {
 	private static final List<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
 	private String name;
@@ -17,8 +24,8 @@ public class Hotel {
 	 * @param rooms an array list consisting of all of the <b>rooms</b>z
 	 */
 	public Hotel(String name, ArrayList<Room> rooms) {
-		this.name = name;
-		this.rooms = rooms;
+		this.name = name == null ? "Unknown" : name;
+		this.rooms = rooms == null ? new ArrayList<>() : rooms;
 	}
 
 	public String getName() {
@@ -51,17 +58,17 @@ public class Hotel {
 	 * @throws InvalidHotelActionException if the number of days does not
 	 *                                     correspond with the specified interval
 	 */
-	public Map<Room, List<LocalDate>> getFreeRoomsAndDates(LocalDate fromDate, LocalDate toDate,
-															   int numberOfDays, int numberOfBeds)
+	public Map<Room, AvailableDatesList> getFreeRoomsAndDates(LocalDate fromDate, LocalDate toDate,
+														   int numberOfDays, int numberOfBeds)
 		throws InvalidHotelActionException {
 		if (numberOfDays != (toDate.getDayOfYear() - fromDate.getDayOfYear())) {
 			throw new InvalidHotelActionException("Number of days does not correspond with selected dates!");
 		}
-		Map<Room, List<LocalDate>> availableRooms = new HashMap<>();
+		Map<Room, AvailableDatesList> availableRooms = new HashMap<>();
 		for (Room room : rooms) {
 			List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(fromDate, toDate, numberOfBeds);
 			if (!availableDates.isEmpty()) {
-				availableRooms.put(room, availableDates);
+				availableRooms.put(room, new AvailableDatesList(availableDates));
 			}
 		}
 		return availableRooms;

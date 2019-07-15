@@ -1,5 +1,11 @@
 package hotel.models;
 
+/**
+ * Manager class - has access to Hotel
+ * which in turn takes care of finding
+ * available rooms and dates
+ * @author Ivan Velkushanov
+ */
 public class Manager {
 	private Hotel hotel;
 	private String name;
