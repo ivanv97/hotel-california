@@ -17,6 +17,7 @@ target/
 # INTELLIJ
 .idea/
 *.iml
+.idea/vcs.xml
 
 # GIT
 *.orig

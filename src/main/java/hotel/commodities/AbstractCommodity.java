@@ -1,5 +1,11 @@
 package hotel.commodities;
 
+/**
+ * Base class for concrete commodities
+ * Declares one abstract method which is to be
+ * overriden by subclasses
+ * @author Ivan Velkushanov
+ */
 public abstract class AbstractCommodity {
 	public static int lastNumberUsed;
 	public final int inventoryNumber;

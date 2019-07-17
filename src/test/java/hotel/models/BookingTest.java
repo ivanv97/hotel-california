@@ -1,125 +1,97 @@
 package hotel.models;
 
-import customexceptions.InvalidHotelActionException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 class BookingTest {
+	private static final String NAME = "Ivan";
+	private static final long EGN = 1234567891L;
+	private static final LocalDate FROM_DATE = LocalDate.of(2019, 9, 18);
+	private static final LocalDate TO_DATE = LocalDate.of(2019, 9, 21);
+	private Booking booking = new Booking(FROM_DATE, TO_DATE, NAME, EGN);
+	private LocalDate bookingToDate;
+	private LocalDate bookingFromDate;
 
-	/**
-	 * Tests if we can instantiate a booking object
-	 * Not allowed to if any of the parameters we pass is null
-	 * or the EGN length is different than 10 digits
-	 * Allowed when all values are valid
-	 */
 	@Test
-	void constructorShouldNotRunWhenInvalidValuesPassed() {
-		assertThrows(InvalidHotelActionException.class,
-			() -> new Booking(null, null, null, 123456789));
-		assertThrows(InvalidHotelActionException.class,
-			() -> new Booking(null, LocalDate.of(2019, 9, 18),
-				"Ivan", 1234567899));
-		assertThrows(InvalidHotelActionException.class,
-			() -> new Booking(LocalDate.of(2019, 9, 18), null,
-				"Ivan", 1234567899));
-		assertThrows(InvalidHotelActionException.class,
-			() -> new Booking(LocalDate.of(2019, 9, 18), LocalDate.of(2019, 9, 21),
-				null, 1234567899));
-		assertThrows(InvalidHotelActionException.class,
-			() -> new Booking(LocalDate.of(2019, 9, 18), LocalDate.of(2019, 9, 21),
-				"Ivan", 123456789));
-		assertDoesNotThrow(() -> new Booking(LocalDate.of(2019, 9, 18),
-			LocalDate.of(2019, 9, 21), "Ivan", 1234567898L));
+	void constructorShouldCreateDefaultNameAndIdValuesIfInvalidPassed() {
+		//when
+		booking = new Booking(FROM_DATE, TO_DATE, null, 123456789L);
+
+		//then
+		assertThat("Guest name is known", booking.getGuestName(), equalTo("unknown"));
+		assertThat("EGN is 10 digits long", booking.getGuestId(), equalTo(-1L));
 	}
 
-	/**
-	 * Test passes if reservations dates are
-	 * successfully changed when chronological
-	 * First date is before the second
-	 */
+	@Test
+	void constructorShouldAssignValuesIfValid() {
+		//when
+		booking = new Booking(FROM_DATE, TO_DATE, NAME, EGN);
+
+		//then
+		assertThat("Name is not assigned", booking.getGuestName(), equalTo(NAME));
+		assertThat("EGN is not assigned", booking.getGuestId(), equalTo(EGN));
+	}
+
 	@Test
 	void changeReservationDatesShouldWorkIfDatesAreChronological() {
-		LocalDate fromDate = LocalDate.of(2019, 9, 18);
-		LocalDate toDate = LocalDate.of(2019, 9, 21);
-		Booking booking = null;
-		try {
-			 booking = new Booking(fromDate, toDate, "Ivan", 1234567898L);
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
-		assertEquals(fromDate,booking.getFromDate());
-		assertEquals(toDate, booking.getToDate());
+		//when
+		bookingToDate = booking.getToDate();
+		bookingFromDate = booking.getFromDate();
+
+		//then
+		assertThat("Dates are not changed successfully", bookingToDate, equalTo(TO_DATE));
+		assertThat("Dates are changed successfully0,", bookingFromDate, equalTo(FROM_DATE));
 	}
 
-	/**
-	 * Test passes if we are not allowed to change
-	 * dates when not in chronological order or equal
-	 */
 	@Test
 	void changeReservationDatesShouldFailIfDatesAreNotChronological() {
-		LocalDate fromDate = LocalDate.of(2019, 9, 18);
-		LocalDate toDate = LocalDate.of(2019, 9, 17);
-		Booking booking = null;
-		try {
-			booking = new Booking(fromDate, toDate, "Ivan", 1234567898L);
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
-		assertNotEquals(fromDate,booking.getFromDate());
-		assertNotEquals(toDate, booking.getToDate());
+		//when
+		booking = new Booking(TO_DATE, FROM_DATE, "Ivan", 1234567898L);
+		bookingToDate = booking.getToDate();
+		bookingFromDate = booking.getFromDate();
+
+		//then
+		assertThat("Dates are changed successfully", bookingToDate, not(equalTo(FROM_DATE)));
+		assertThat("Dates are changed successfully0,", bookingFromDate, not(equalTo(TO_DATE)));
 	}
 
-	/**
-	 * Test passes when we have different rooms
-	 * and their hashcodes are not the same
-	 */
+	@Test
+	void changeReservationDatesShouldFailIfDatesAreNull() {
+		//when
+		booking.changeReservationDates(null, null);
+		bookingToDate = booking.getToDate();
+		bookingFromDate = booking.getFromDate();
+
+		//then
+		assertThat("Date is null", bookingFromDate, not(equalTo(null)));
+		assertThat("Date is null", bookingToDate, not(equalTo(null)));
+	}
+
 	@Test
 	void hashCodeShouldBeDifferent() {
-		try {
-			Booking booking1 = new Booking(LocalDate.of(2019, 9, 18),
-				LocalDate.of(2019, 9, 21), "Ivan", 1234567898L);
-			Booking booking2 = new Booking(LocalDate.of(2019, 9, 25),
-				LocalDate.of(2019, 9, 30), "Peter", 1234567897L);
-			assertNotEquals(booking1.hashCode(), booking2.hashCode());
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
+		//when
+		Booking booking2 = new Booking(FROM_DATE, TO_DATE, "Peter", 1234567897L);
+
+		//then
+		assertThat("Hash codes are the same!", booking.hashCode(), not(equalTo(booking2.hashCode())));
 	}
 
-	/**
-	 * Equals should return true when comparing
-	 * identical objects - same hash value
-	 */
 	@Test
 	void equalsShouldReturnTrueWhenComparingBookingsWithTheSameHash() {
-		try {
-			Booking booking1 = new Booking(LocalDate.of(2019, 9, 18),
-				LocalDate.of(2019, 9, 21), "Ivan", 1234567898L);
-			Booking booking2 = booking1;
-			assertTrue(booking1.equals(booking2));
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
+		//when
+		Booking booking2 = booking;
+
+		//then
+		assertThat("Bookings are not equal", booking, equalTo(booking2));
 	}
 
-	/**
-	 * Equals should return false if the we compare
-	 * with null or object of different type
-	 */
 	@Test
-	void equalsShouldReturnFalseWhenComparingWithNullOrOtherType(){
-		try {
-			Booking booking = new Booking(LocalDate.of(2019, 9, 18),
-				LocalDate.of(2019, 9, 21), "Ivan", 1234567898L);
-			assertFalse(booking.equals(null));
-			assertFalse(booking.equals("booking"));
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
+	void equalsShouldReturnFalseWhenComparingWithNullOrOtherType() {
+		assertThat("Comparing with null", booking, not(equalTo(null)));
+		assertThat("Comparing with other type", booking, not(equalTo("booking")));
 	}
 }
