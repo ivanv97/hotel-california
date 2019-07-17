@@ -23,7 +23,7 @@ public class Hotel {
 	 * @param name  <b>name</b> of the hotel
 	 * @param rooms an array list consisting of all of the <b>rooms</b>z
 	 */
-	public Hotel(String name, ArrayList<Room> rooms) {
+	public Hotel(String name, List<Room> rooms) {
 		this.name = name == null ? "Unknown" : name;
 		this.rooms = rooms == null ? new ArrayList<>() : rooms;
 	}

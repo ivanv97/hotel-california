@@ -1,7 +1,5 @@
 package hotel.models;
 
-import customexceptions.InvalidHotelActionException;
-
 import java.time.LocalDate;
 
 /**
@@ -9,6 +7,7 @@ import java.time.LocalDate;
  * of each Room object - it allows
  * reservation dates to be updated and
  * it can be added to set
+ *
  * @author Ivan Velkushanov
  */
 public class Booking {
@@ -17,7 +16,7 @@ public class Booking {
 	private LocalDate fromDate;
 	private LocalDate toDate;
 	private String guestName;
-	private final long guestId;
+	private long guestId;
 
 	/**
 	 * Constructor of the Booking class
@@ -26,19 +25,12 @@ public class Booking {
 	 * @param toDate
 	 * @param guestName
 	 * @param guestId
-	 * @throws InvalidHotelActionException throws custom exception if any of the
-	 *                                     passed arguments is not valid for object creation
 	 */
-	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId)
-		throws InvalidHotelActionException {
-		if (fromDate != null && toDate != null && guestName != null && guestId/1_000_000_000L >= 1) {
-			changeReservationDates(fromDate, toDate);
-			this.guestName = guestName;
-			this.guestId = guestId;
-			bookingNumber = ++lastNumberUsed;
-		} else {
-			throw new InvalidHotelActionException("Booking object cannot be created!");
-		}
+	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId) {
+		changeReservationDates(fromDate, toDate);
+		this.guestName = guestName != null? guestName : "unknown";
+		this.guestId = guestId /1_000_000_000L >= 1? guestId : -1L ;
+		bookingNumber = ++lastNumberUsed;
 	}
 
 	public LocalDate getFromDate() {
@@ -73,15 +65,18 @@ public class Booking {
 	 * @param toDate   the new final date
 	 */
 	public void changeReservationDates(LocalDate fromDate, LocalDate toDate) {
-		if (!toDate.isBefore(fromDate)) {
-			this.fromDate = fromDate;
-			this.toDate = toDate;
+		if(fromDate != null && toDate != null) {
+			if (!toDate.isBefore(fromDate)) {
+				this.fromDate = fromDate;
+				this.toDate = toDate;
+			}
 		}
 	}
 
 	/**
 	 * The hashCode method is overriden
 	 * to return the booking's number which is unique
+	 *
 	 * @return bookingNumber
 	 */
 	@Override
@@ -92,6 +87,7 @@ public class Booking {
 	/**
 	 * Two booking objects are equal
 	 * if their booking numbers and dates are equal
+	 *
 	 * @param object booking object to compare with
 	 * @return true - if the bookings are equal
 	 * false if comparing with null or other type

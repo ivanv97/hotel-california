@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  * for creating a room with commodities,
  * dates on which it was under maintenance
  * and current bookings
+ *
  * @author Ivan Velkushanov
  */
 public class Room {
@@ -30,11 +31,7 @@ public class Room {
 	 * @param commodities The commodities belonging to the room
 	 */
 	public Room(int number, Set<AbstractCommodity> commodities) {
-		if (commodities == null) {
-			this.commodities = new HashSet<>();
-		} else {
-			this.commodities = commodities;
-		}
+		this.commodities = commodities == null ? new HashSet<>() : commodities;
 		setNumber(number);
 		maintenanceDates = new HashSet<>();
 		bookings = new HashSet<>();
@@ -165,15 +162,8 @@ public class Room {
 	 */
 
 	public List<LocalDate> findAvailableDatesForIntervalAndSize(LocalDate fromDate, LocalDate toDate, int numberOfBeds) {
-		int currentNumberOfBeds = 0;
-		//Get the number of beds in the room
-		for (AbstractCommodity commodity : commodities) {
-			if (commodity instanceof Bed) {
-				currentNumberOfBeds++;
-			}
-		}
-		//Return empty array list if the number of beds does not match
-		if (currentNumberOfBeds != numberOfBeds) {
+		//Return empty arrayList if the bed number does not match
+		if (!checkIfEnoughBeds(numberOfBeds)) {
 			return new ArrayList<>();
 		}
 
@@ -203,6 +193,26 @@ public class Room {
 		return availableDates;
 	}
 
+	/**
+	 * Checks if the requested number of
+	 * beds matches the actual number of
+	 * beds in the room
+	 *
+	 * @param numberOfBeds requested number of beds
+	 * @return true - if the numbers match
+	 * false - if they don't
+	 */
+	private boolean checkIfEnoughBeds(int numberOfBeds) {
+		int currentNumberOfBeds = 0;
+		//Get the number of beds in the room
+		for (AbstractCommodity commodity : commodities) {
+			if (commodity instanceof Bed) {
+				currentNumberOfBeds++;
+			}
+		}
+		return currentNumberOfBeds == numberOfBeds;
+	}
+
 	@Override
 	public int hashCode() {
 		return number;
@@ -218,7 +228,7 @@ public class Room {
 	}
 
 	@Override
-	public String toString(){
+	public String toString() {
 		return Integer.toString(number);
 	}
 }
