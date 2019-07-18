@@ -1,5 +1,7 @@
 package hotel.models;
 
+import customexceptions.InvalidHotelActionException;
+
 import java.time.LocalDate;
 
 /**
@@ -23,12 +25,11 @@ public class Booking {
 	 *
 	 * @param fromDate
 	 * @param toDate
-	 * @param guestName
 	 * @param guestId
 	 */
-	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId) {
+	public Booking(LocalDate fromDate, LocalDate toDate, long guestId) {
 		changeReservationDates(fromDate, toDate);
-		this.guestName = guestName != null? guestName : "unknown";
+		guestName = "unknown";
 		this.guestId = guestId /1_000_000_000L >= 1? guestId : -1L ;
 		bookingNumber = ++lastNumberUsed;
 	}
@@ -60,13 +61,14 @@ public class Booking {
 	/**
 	 * Changes the reservation dates of the booking
 	 * first checks if fromDate is before toDate
+	 * and that they are not null
 	 *
 	 * @param fromDate the new beginning date
 	 * @param toDate   the new final date
 	 */
 	public void changeReservationDates(LocalDate fromDate, LocalDate toDate) {
 		if(fromDate != null && toDate != null) {
-			if (!toDate.isBefore(fromDate)) {
+			if (toDate.isAfter(fromDate)) {
 				this.fromDate = fromDate;
 				this.toDate = toDate;
 			}

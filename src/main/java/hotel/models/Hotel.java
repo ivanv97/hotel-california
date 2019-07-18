@@ -1,7 +1,11 @@
 package hotel.models;
 
 import customexceptions.InvalidHotelActionException;
+import hotel.commodities.AbstractCommodity;
+import hotel.commodities.Bed;
 
+import javax.swing.*;
+import java.rmi.registry.LocateRegistry;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -10,6 +14,7 @@ import java.util.*;
  * name as list of Room objects
  * Implements logic for finding available rooms
  * for particular dates and number of people
+ *
  * @author Ivan Velkushanov
  */
 public class Hotel {
@@ -59,8 +64,7 @@ public class Hotel {
 	 *                                     correspond with the specified interval
 	 */
 	public Map<Room, AvailableDatesList> getFreeRoomsAndDates(LocalDate fromDate, LocalDate toDate,
-														   int numberOfDays, int numberOfBeds)
-		throws InvalidHotelActionException {
+															  int numberOfDays, int numberOfBeds) {
 		if (numberOfDays != (toDate.getDayOfYear() - fromDate.getDayOfYear())) {
 			throw new InvalidHotelActionException("Number of days does not correspond with selected dates!");
 		}
@@ -70,6 +74,35 @@ public class Hotel {
 			if (!availableDates.isEmpty()) {
 				availableRooms.put(room, new AvailableDatesList(availableDates));
 			}
+		}
+		return availableRooms;
+	}
+
+	/**
+	 * Returns a list of the available rooms
+	 * if such exists for the desired interval
+	 * and number of people per room and is
+	 * not already booked
+	 * @param fromDate
+	 * @param toDate
+	 * @param numberOfPeople the number that should match the beds' capacity
+	 * @return List of available rooms for the dates specified
+	 * @throws InvalidHotelActionException when the specified interval does not offer any
+	 * free rooms thus the list remains empty
+	 */
+	public List<Room> findAvailableRooms(LocalDate fromDate, LocalDate toDate, int numberOfPeople, List<Integer> alreadyBookedRooms) {
+		List<Room> availableRooms = new ArrayList<>();
+		if (toDate.isAfter(fromDate)) {
+			for (Room room : rooms) {
+				if (!alreadyBookedRooms.contains(room.getNumber()) && !room.checkIfBooked(fromDate, toDate)) {
+					if (room.checkIfEnoughBeds(numberOfPeople)) {
+						availableRooms.add(room);
+					}
+				}
+			}
+		}
+		if (availableRooms.isEmpty()) {
+			throw new InvalidHotelActionException("There are no free rooms for the specified interval");
 		}
 		return availableRooms;
 	}

@@ -8,49 +8,48 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 class BookingTest {
-	private static final String NAME = "Ivan";
-	private static final long EGN = 1234567891L;
+	//Given
 	private static final LocalDate FROM_DATE = LocalDate.of(2019, 9, 18);
 	private static final LocalDate TO_DATE = LocalDate.of(2019, 9, 21);
-	private Booking booking = new Booking(FROM_DATE, TO_DATE, NAME, EGN);
+	private static final long EGN = 1234567891L;
+	private Booking booking = new Booking(FROM_DATE, TO_DATE, EGN);
 	private LocalDate bookingToDate;
 	private LocalDate bookingFromDate;
 
 	@Test
-	void constructorShouldCreateDefaultNameAndIdValuesIfInvalidPassed() {
+	void constructorShouldCreateIdIfInvalidPassed() {
 		//when
-		booking = new Booking(FROM_DATE, TO_DATE, null, 123456789L);
+		booking = new Booking(FROM_DATE, TO_DATE, 123456789L);
 
 		//then
-		assertThat("Guest name is known", booking.getGuestName(), equalTo("unknown"));
 		assertThat("EGN is 10 digits long", booking.getGuestId(), equalTo(-1L));
 	}
 
 	@Test
-	void constructorShouldAssignValuesIfValid() {
+	void constructorShouldAssignIdIfValidOnePassed() {
 		//when
-		booking = new Booking(FROM_DATE, TO_DATE, NAME, EGN);
+		booking = new Booking(FROM_DATE, TO_DATE, EGN);
 
 		//then
-		assertThat("Name is not assigned", booking.getGuestName(), equalTo(NAME));
 		assertThat("EGN is not assigned", booking.getGuestId(), equalTo(EGN));
 	}
 
 	@Test
 	void changeReservationDatesShouldWorkIfDatesAreChronological() {
 		//when
+		booking.changeReservationDates(LocalDate.of(2019,2,1),LocalDate.of(2019,2,2));
 		bookingToDate = booking.getToDate();
 		bookingFromDate = booking.getFromDate();
 
 		//then
-		assertThat("Dates are not changed successfully", bookingToDate, equalTo(TO_DATE));
-		assertThat("Dates are changed successfully0,", bookingFromDate, equalTo(FROM_DATE));
+		assertThat("Dates are not changed successfully", bookingFromDate, equalTo(LocalDate.of(2019,2,1)));
+		assertThat("Dates are not changed successfully0,", bookingToDate, equalTo(LocalDate.of(2019,2,2)));
 	}
 
 	@Test
 	void changeReservationDatesShouldFailIfDatesAreNotChronological() {
 		//when
-		booking = new Booking(TO_DATE, FROM_DATE, "Ivan", 1234567898L);
+		booking.changeReservationDates(TO_DATE,FROM_DATE);
 		bookingToDate = booking.getToDate();
 		bookingFromDate = booking.getFromDate();
 
@@ -74,7 +73,7 @@ class BookingTest {
 	@Test
 	void hashCodeShouldBeDifferent() {
 		//when
-		Booking booking2 = new Booking(FROM_DATE, TO_DATE, "Peter", 1234567897L);
+		Booking booking2 = new Booking(FROM_DATE, TO_DATE, 1234567897L);
 
 		//then
 		assertThat("Hash codes are the same!", booking.hashCode(), not(equalTo(booking2.hashCode())));

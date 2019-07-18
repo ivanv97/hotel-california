@@ -88,19 +88,12 @@ public class Room {
 	 *
 	 * @param fromDate  arrival date
 	 * @param toDate    departing date
-	 * @param guestName name of the guest
 	 * @param guestId   EGN of the guest
-	 * @throws InvalidHotelActionException if the specified interval intervenes with
-	 *                                     already created bookings
 	 */
-	public void createBooking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId)
-		throws InvalidHotelActionException {
-		if (!checkIfBooked(fromDate, toDate)) {
-			bookings.add(new Booking(fromDate, toDate, guestName, guestId));
-			prepareCommodities(fromDate);
-			return;
-		}
-		throw new InvalidHotelActionException("Booking can't be made with the specified date interval!");
+	public int createBooking(LocalDate fromDate, LocalDate toDate, long guestId) {
+		bookings.add(new Booking(fromDate, toDate, guestId));
+		prepareCommodities(fromDate);
+		return number;
 	}
 
 
@@ -133,6 +126,7 @@ public class Room {
 	 * @param toDate
 	 * @return true if it is booked
 	 * false if it is vacant
+	 * false if there are no bookings
 	 */
 	public boolean checkIfBooked(LocalDate fromDate, LocalDate toDate) {
 		if (bookings.isEmpty()) {
@@ -158,7 +152,7 @@ public class Room {
 	 * @param toDate       check to date
 	 * @param numberOfBeds how many beds in the room
 	 * @return the list of the dates - can be empty if no available dates
-	 * found
+	 * found or the number of beds does not correspond to the wanted one
 	 */
 
 	public List<LocalDate> findAvailableDatesForIntervalAndSize(LocalDate fromDate, LocalDate toDate, int numberOfBeds) {
@@ -202,12 +196,13 @@ public class Room {
 	 * @return true - if the numbers match
 	 * false - if they don't
 	 */
-	private boolean checkIfEnoughBeds(int numberOfBeds) {
+	public boolean checkIfEnoughBeds(int numberOfBeds) {
 		int currentNumberOfBeds = 0;
 		//Get the number of beds in the room
 		for (AbstractCommodity commodity : commodities) {
 			if (commodity instanceof Bed) {
-				currentNumberOfBeds++;
+				Bed bed = (Bed) commodity;
+				currentNumberOfBeds += bed.getBedType().getSize();
 			}
 		}
 		return currentNumberOfBeds == numberOfBeds;

@@ -2,6 +2,7 @@ package hotel.models;
 
 import customexceptions.InvalidHotelActionException;
 import hotel.commodities.Bed;
+import hotel.commodities.BedType;
 import hotel.commodities.Shower;
 import hotel.commodities.Toilet;
 import org.junit.jupiter.api.AfterEach;
@@ -16,15 +17,16 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RoomTest {
-	Room room;
+	private Room room;
 
 	@BeforeEach
 	void setUp() {
-		room = new Room(102, new HashSet<>(Arrays.asList(new Bed(), new Toilet(), new Shower())));
+		room = new Room(102, new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE), new Toilet(), new Shower())));
 	}
 
 	@AfterEach
 	void tearDown() {
+		room.getBookings().clear();
 		Hotel.getTakenRoomNumbers().clear();
 	}
 
@@ -52,49 +54,23 @@ class RoomTest {
 	}
 
 	@Test
-	void createBookingShouldSucceedIfProperArgumentsPassed() {
-		assertDoesNotThrow(() -> room.createBooking(LocalDate.of(2019, 1, 10),
-			LocalDate.of(2019, 1, 14), "Ivan", 1234567893L));
-	}
-
-	@Test
-	void createBookingShouldNotWorkWhenAlreadyBooked() {
-		try {
-			//when
-			room.createBooking(LocalDate.of(2019, 9, 10),
-				LocalDate.of(2019, 9, 14), "Ivan", 1234567893L);
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
-		//then
-		assertThrows(InvalidHotelActionException.class, () -> room.createBooking(LocalDate.of(2019, 9, 10),
-			LocalDate.of(2019, 9, 11), "Ivan", 1234567893L));
-	}
-
-	@Test
 	void removeBookingShouldWorkWhenRemovingExistingBooking() {
-		try {
-			//when
-			room.createBooking(LocalDate.of(2020, 9, 10),
-				LocalDate.of(2020, 9, 14), "Ivan", 1234567893L);
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
-		//then
-		assertDoesNotThrow(() -> room.removeBooking(LocalDate.of(2020, 9, 10),
+		//When
+		room.createBooking(LocalDate.of(2020, 9, 10),
+			LocalDate.of(2020, 9, 14), 1234567893L);
+
+		//Then
+		assertDoesNotThrow(() ->room.removeBooking(LocalDate.of(2020, 9, 10),
 			LocalDate.of(2020, 9, 14)));
 	}
 
 	@Test
-	void removeBookingShouldThrowExcWhenBookingIsNonExisting() {
-		try {
-			//when
-			room.createBooking(LocalDate.of(2020, 9, 10),
-				LocalDate.of(2020, 9, 14), "Ivan", 1234567893L);
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
-		//then
+	void removeBookingShouldNotWorkIfBookingNonExisting() {
+		//When
+		room.createBooking(LocalDate.of(2020, 9, 10),
+			LocalDate.of(2020, 9, 14), 1234567893L);
+
+		//Then
 		assertThrows(InvalidHotelActionException.class, () -> room.removeBooking(LocalDate.of(2024, 9, 10),
 			LocalDate.of(2020, 9, 14)));
 	}
@@ -107,13 +83,10 @@ class RoomTest {
 
 	@Test
 	void checkIfBookedShouldReturnTrueIfDatesNotFree() {
-		try {
-			//when
-			room.createBooking(LocalDate.of(2020, 9, 10),
-				LocalDate.of(2020, 9, 14), "Ivan", 1234567893L);
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
+		//When
+		room.createBooking(LocalDate.of(2020, 9, 10),
+			LocalDate.of(2020, 9, 14), 1234567893L);
+
 		//then
 		assertTrue(room.checkIfBooked(LocalDate.of(2020, 9, 10),
 			LocalDate.of(2020, 9, 14)));
@@ -121,14 +94,11 @@ class RoomTest {
 
 	@Test
 	void checkIfBookedShouldReturnFalseIfDatesAreFree() {
-		try {
-			//when
-			room.createBooking(LocalDate.of(2020, 9, 10),
-				LocalDate.of(2020, 9, 14), "Ivan", 1234567893L);
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
-		//then
+		//When
+		room.createBooking(LocalDate.of(2020, 9, 10),
+			LocalDate.of(2020, 9, 14), 1234567893L);
+
+		//Then
 		assertFalse(room.checkIfBooked(LocalDate.of(2020, 9, 15),
 			LocalDate.of(2020, 9, 21)));
 	}
@@ -137,16 +107,14 @@ class RoomTest {
 	@Test
 	void findAvailableDatesForIntervalAndSizeShouldReturnOnlySomeDates() {
 		//given
-		try {
-			room.createBooking(LocalDate.of(2020, 9, 10),
-				LocalDate.of(2020, 9, 14), "Ivan", 1234567893L);
-		} catch (InvalidHotelActionException e) {
-			e.printStackTrace();
-		}
+		room.createBooking(LocalDate.of(2020, 9, 10),
+			LocalDate.of(2020, 9, 14), 1234567893L);
 		LocalDate endDate = LocalDate.of(2020, 9, 15);
+
 		//when
 		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(LocalDate.of(2020, 9, 10),
 			endDate, 1);
+
 		//then
 		assertTrue(availableDates.contains(endDate) && availableDates.contains(LocalDate.of(2020, 9, 14))
 			&& availableDates.size() == 2);
@@ -165,12 +133,12 @@ class RoomTest {
 		//when
 		Room room2 = room;
 		//then
-		assertTrue(room.equals(room2));
+		assertEquals(room, room2);
 	}
 
 	@Test
 	void equalsShouldReturnFalseWhenComparingWithNullOrOtherType() {
-		assertFalse(room.equals(null));
-		assertFalse(room.equals("room"));
+		assertNotEquals(null, room);
+		assertNotEquals("room", room);
 	}
 }

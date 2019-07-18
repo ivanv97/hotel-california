@@ -6,7 +6,7 @@ package customexceptions;
  * freeing of a room or finding
  * suitable dates for booking
  */
-public class InvalidHotelActionException extends Exception {
+public class InvalidHotelActionException extends RuntimeException {
 	public InvalidHotelActionException(String message) {
 		super(message);
 	}
