@@ -12,6 +12,7 @@ import java.util.List;
  * @author Ivan Velkushanov
  */
 public class Manager {
+	private static final int FIRST_ROOM = 0;
 	private Hotel hotel;
 	private String name;
 	private List<Integer> bookedRoomsNumbers = new ArrayList<>();
@@ -62,7 +63,7 @@ public class Manager {
 	 */
 	public int createBooking(LocalDate fromDate, LocalDate toDate, int numberOfPeople, long reserveeId){
 		List<Room> availableRooms = hotel.findAvailableRooms(fromDate,toDate, numberOfPeople, bookedRoomsNumbers);
-		int bookedRoomNumber = availableRooms.get(0).createBooking(fromDate,toDate,reserveeId);
+		int bookedRoomNumber = availableRooms.get(FIRST_ROOM).createBooking(fromDate,toDate,reserveeId);
 		bookedRoomsNumbers.add(bookedRoomNumber);
 		return bookedRoomNumber;
 	}

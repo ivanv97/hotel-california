@@ -18,6 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RoomTest {
 	private Room room;
+	private static final LocalDate FROM_DATE = LocalDate.of(2020, 9, 10);
+	private static final LocalDate TO_DATE = LocalDate.of(2020, 9, 14);
+	private static final long EGN = 1234567893L;
 
 	@BeforeEach
 	void setUp() {
@@ -45,78 +48,62 @@ class RoomTest {
 
 	@Test
 	void prepareCommodities() {
-		//given
-		LocalDate maintenanceDate = LocalDate.of(2019, 7, 14);
 		//when
-		room.prepareCommodities(maintenanceDate);
+		room.prepareCommodities(FROM_DATE);
 		//then
-		assertTrue(room.getMaintenanceDates().contains(maintenanceDate));
+		assertTrue(room.getMaintenanceDates().contains(FROM_DATE));
 	}
 
 	@Test
 	void removeBookingShouldWorkWhenRemovingExistingBooking() {
 		//When
-		room.createBooking(LocalDate.of(2020, 9, 10),
-			LocalDate.of(2020, 9, 14), 1234567893L);
+		room.createBooking(FROM_DATE, TO_DATE, EGN);
 
 		//Then
-		assertDoesNotThrow(() ->room.removeBooking(LocalDate.of(2020, 9, 10),
-			LocalDate.of(2020, 9, 14)));
+		assertDoesNotThrow(() -> room.removeBooking(FROM_DATE, TO_DATE));
 	}
 
 	@Test
 	void removeBookingShouldNotWorkIfBookingNonExisting() {
 		//When
-		room.createBooking(LocalDate.of(2020, 9, 10),
-			LocalDate.of(2020, 9, 14), 1234567893L);
+		room.createBooking(FROM_DATE, TO_DATE, EGN);
 
 		//Then
-		assertThrows(InvalidHotelActionException.class, () -> room.removeBooking(LocalDate.of(2024, 9, 10),
-			LocalDate.of(2020, 9, 14)));
+		assertThrows(InvalidHotelActionException.class, () -> room.removeBooking(FROM_DATE.plusDays(1), TO_DATE));
 	}
 
 	@Test
 	void checkIfBookedShouldReturnFalseIfNoBookings() {
-		assertFalse(room.checkIfBooked(LocalDate.of(2019, 10, 21),
-			LocalDate.of(2019, 10, 29)));
+		assertFalse(room.checkIfBooked(FROM_DATE, TO_DATE));
 	}
 
 	@Test
 	void checkIfBookedShouldReturnTrueIfDatesNotFree() {
 		//When
-		room.createBooking(LocalDate.of(2020, 9, 10),
-			LocalDate.of(2020, 9, 14), 1234567893L);
+		room.createBooking(FROM_DATE, TO_DATE, EGN);
 
 		//then
-		assertTrue(room.checkIfBooked(LocalDate.of(2020, 9, 10),
-			LocalDate.of(2020, 9, 14)));
+		assertTrue(room.checkIfBooked(FROM_DATE.plusDays(1), TO_DATE));
 	}
 
 	@Test
 	void checkIfBookedShouldReturnFalseIfDatesAreFree() {
 		//When
-		room.createBooking(LocalDate.of(2020, 9, 10),
-			LocalDate.of(2020, 9, 14), 1234567893L);
+		room.createBooking(FROM_DATE, TO_DATE, EGN);
 
 		//Then
-		assertFalse(room.checkIfBooked(LocalDate.of(2020, 9, 15),
-			LocalDate.of(2020, 9, 21)));
+		assertFalse(room.checkIfBooked(FROM_DATE.plusDays(5), TO_DATE.plusDays(5)));
 	}
-
 
 	@Test
 	void findAvailableDatesForIntervalAndSizeShouldReturnOnlySomeDates() {
 		//given
-		room.createBooking(LocalDate.of(2020, 9, 10),
-			LocalDate.of(2020, 9, 14), 1234567893L);
-		LocalDate endDate = LocalDate.of(2020, 9, 15);
-
+		room.createBooking(FROM_DATE, TO_DATE, EGN);
 		//when
-		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(LocalDate.of(2020, 9, 10),
-			endDate, 1);
+		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE.plusDays(1), 1);
 
 		//then
-		assertTrue(availableDates.contains(endDate) && availableDates.contains(LocalDate.of(2020, 9, 14))
+		assertTrue(availableDates.contains(TO_DATE.plusDays(1)) && availableDates.contains(TO_DATE)
 			&& availableDates.size() == 2);
 	}
 

@@ -55,7 +55,7 @@ class BookingTest {
 
 		//then
 		assertThat("Dates are changed successfully", bookingToDate, not(equalTo(FROM_DATE)));
-		assertThat("Dates are changed successfully0,", bookingFromDate, not(equalTo(TO_DATE)));
+		assertThat("Dates are changed successfully,", bookingFromDate, not(equalTo(TO_DATE)));
 	}
 
 	@Test

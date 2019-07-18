@@ -63,8 +63,8 @@ class HotelTest {
 		//then
 		assertDoesNotThrow(() -> hotel.getFreeRoomsAndDates(LocalDate.of(2019, 7, 19),
 			LocalDate.of(2019, 7, 20), 1, 1));
-		assertTrue(roomsAndDates.get(room).getList().contains(LocalDate.of(2019, 7, 19))
-			&& roomsAndDates.get(room).getList().size() == 1);
+		assertTrue(roomsAndDates.get(room).getAvailableDates().contains(LocalDate.of(2019, 7, 19))
+			&& roomsAndDates.get(room).getAvailableDates().size() == 1);
 	}
 
 	@Test

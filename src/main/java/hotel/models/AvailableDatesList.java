@@ -5,21 +5,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Wrapper class for the list of available dates
+ * Wrapper class for the availableDates of available dates
  * @author Ivan Velkushanov
  */
 public class AvailableDatesList {
-	private List<LocalDate> list = new ArrayList<>();
+	private List<LocalDate> availableDates;
 
-	public AvailableDatesList(List<LocalDate> list){
-		this.list = list;
+	public AvailableDatesList(List<LocalDate> availableDates){
+		setAvailableDates(availableDates);
 	}
 
-	public List<LocalDate> getList() {
-		return list;
+	public List<LocalDate> getAvailableDates() {
+		return availableDates;
 	}
 
-	public void setList(List<LocalDate> list) {
-		this.list = list;
+	public void setAvailableDates(List<LocalDate> availableDates) {
+		this.availableDates = availableDates == null? new ArrayList<>(): availableDates;
 	}
 }

@@ -16,14 +16,14 @@ class ManagerTest {
 	private static Manager manager;
 
 	@BeforeAll
-	static void setUp(){
+	static void setUp() {
 		hotel = new Hotel("California", null);
 		manager = new Manager("Ivan");
 		manager.setHotel(hotel);
 	}
 
 	@AfterEach
-	void tearDown(){
+	void tearDown() {
 		hotel.getRooms().clear();
 		hotel.getTakenRoomNumbers().clear();
 		manager.getBookedRoomsNumbers().clear();
@@ -32,7 +32,8 @@ class ManagerTest {
 	@Test
 	void bookThreeRooms() {
 		//given
-		Set<AbstractCommodity> firstRoomCommodities = new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE), new Shower(), new Toilet()));
+		Set<AbstractCommodity> firstRoomCommodities = new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE),
+			new Shower(), new Toilet()));
 
 		Set<AbstractCommodity> secondRoomCommodities = new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE),
 			new Bed(BedType.SINGLE), new Bed(BedType.SINGLE), new Shower(), new Toilet(), new Toilet()));
@@ -52,7 +53,7 @@ class ManagerTest {
 
 			for (Room room : availableRoomsAndDates.keySet()) {
 				assertDoesNotThrow(() -> manager.createBooking(LocalDate.of(2019, 7, 20),
-					LocalDate.of(2019, 7, 25),2,1234567899L));
+					LocalDate.of(2019, 7, 25), 2, 1234567899L));
 			}
 
 			//when
@@ -62,7 +63,7 @@ class ManagerTest {
 			//then
 			for (Room room : availableRoomsAndDates.keySet()) {
 				assertDoesNotThrow(() -> manager.createBooking(LocalDate.of(2019, 7, 22),
-					LocalDate.of(2019, 7, 23),1, 1234567898L));
+					LocalDate.of(2019, 7, 23), 1, 1234567898L));
 				break;
 			}
 
@@ -72,8 +73,9 @@ class ManagerTest {
 				LocalDate.of(2019, 7, 21), 2, 2);
 			//then
 			for (Room room : availableRoomsAndDates.keySet()) {
-				assertThrows(InvalidHotelActionException.class, () -> manager.createBooking(LocalDate.of(2019, 7, 19),
-					LocalDate.of(2019, 7, 21), 2,1234567898L));
+				assertThrows(InvalidHotelActionException.class, () -> manager.createBooking(
+					LocalDate.of(2019, 7, 19),
+					LocalDate.of(2019, 7, 21), 2, 1234567898L));
 				break;
 			}
 
@@ -83,32 +85,32 @@ class ManagerTest {
 	}
 
 	@Test
-	void createBookingsCustomTaskTestScenarioOne(){
+	void createBookingsCustomTaskTestScenarioOne() {
 		//Given
-		Room room = new Room(101,new HashSet<>(Arrays.asList(new Bed(BedType.DOUBLE))));
+		Room room = new Room(101, new HashSet<>(Arrays.asList(new Bed(BedType.DOUBLE))));
 		hotel.getRooms().add(room);
 
 		//When
-		int bookedRoomNumber = manager.createBooking(LocalDate.of(2019,1,1),
-			LocalDate.of(2019,1,2),2,1234567891L);
-		assertEquals(101,bookedRoomNumber);
+		int bookedRoomNumber = manager.createBooking(LocalDate.of(2019, 1, 1),
+			LocalDate.of(2019, 1, 2), 2, 1234567891L);
+		assertEquals(101, bookedRoomNumber);
 	}
 
 	@Test
-	void createBookingsCustomTaskTestScenarioTwo(){
-		assertThrows(InvalidHotelActionException.class, () -> manager.createBooking(LocalDate.of(2019,1,1),
-			LocalDate.of(2019,1,2),2,1234567891L));
+	void createBookingsCustomTaskTestScenarioTwo() {
+		assertThrows(InvalidHotelActionException.class, () -> manager.createBooking(LocalDate.of(2019, 1, 1),
+			LocalDate.of(2019, 1, 2), 2, 1234567891L));
 	}
 
 	@Test
-	void createBookingsCustomTaskTestScenarioThree(){
+	void createBookingsCustomTaskTestScenarioThree() {
 		//Given
-		Room room = new Room(101,new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE))));
+		Room room = new Room(101, new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE))));
 		hotel.getRooms().add(room);
 
 		//Then
-		assertThrows(InvalidHotelActionException.class, () -> manager.createBooking(LocalDate.of(2019,1,1),
-			LocalDate.of(2019,1,2),2,1234567891L));
+		assertThrows(InvalidHotelActionException.class, () -> manager.createBooking(LocalDate.of(2019, 1, 1),
+			LocalDate.of(2019, 1, 2), 2, 1234567891L));
 	}
 
 }

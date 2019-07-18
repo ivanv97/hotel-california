@@ -1,7 +1,5 @@
 package hotel.models;
 
-import customexceptions.InvalidHotelActionException;
-
 import java.time.LocalDate;
 
 /**
@@ -13,6 +11,7 @@ import java.time.LocalDate;
  * @author Ivan Velkushanov
  */
 public class Booking {
+	private static final String UNKNOWN_NAME = "unknown";
 	private static int lastNumberUsed;
 	private final int bookingNumber;
 	private LocalDate fromDate;
@@ -22,14 +21,31 @@ public class Booking {
 
 	/**
 	 * Constructor of the Booking class
+	 * to be used when the name of the guest is
+	 * unknown - calls overloaded version of the constructor
+	 * which assigns "unknown" to guestName
 	 *
 	 * @param fromDate
 	 * @param toDate
 	 * @param guestId
 	 */
 	public Booking(LocalDate fromDate, LocalDate toDate, long guestId) {
+		this(fromDate,toDate,UNKNOWN_NAME,guestId);
+	}
+
+	/**
+	 * Overloaded constructor that takes parameter
+	 * guestName as well and assigns the argument passed
+	 * to the private field guestName
+	 *
+	 * @param fromDate
+	 * @param toDate
+	 * @param guestName
+	 * @param guestId
+	 */
+	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId) {
+		this.guestName = guestName;
 		changeReservationDates(fromDate, toDate);
-		guestName = "unknown";
 		this.guestId = guestId /1_000_000_000L >= 1? guestId : -1L ;
 		bookingNumber = ++lastNumberUsed;
 	}
