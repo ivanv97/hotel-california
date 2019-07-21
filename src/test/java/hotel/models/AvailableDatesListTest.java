@@ -17,7 +17,7 @@ class AvailableDatesListTest {
 	}
 
 	@Test
-	void setAvailableDatesShouldCreateAssignThePassedListIfNotNull() {
+	void setAvailableDatesShouldAssignThePassedListIfNotNull() {
 		AvailableDatesList availableDatesList = new AvailableDatesList(new ArrayList<>(Arrays.asList(
 			LocalDate.of(2019,9,9),LocalDate.of(2019,9,10))));
 		assertTrue(availableDatesList.getAvailableDates().size() == 2);

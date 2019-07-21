@@ -84,6 +84,7 @@ class RoomTest {
 
 		//then
 		assertTrue(room.checkIfBooked(FROM_DATE.plusDays(1), TO_DATE));
+		assertTrue(room.checkIfBooked(FROM_DATE, TO_DATE.minusDays(1)));
 	}
 
 	@Test
@@ -92,7 +93,8 @@ class RoomTest {
 		room.createBooking(FROM_DATE, TO_DATE, EGN);
 
 		//Then
-		assertFalse(room.checkIfBooked(FROM_DATE.plusDays(5), TO_DATE.plusDays(5)));
+		assertFalse(room.checkIfBooked(TO_DATE, TO_DATE.plusDays(5)));
+		assertFalse(room.checkIfBooked(FROM_DATE.minusDays(5),FROM_DATE));
 	}
 
 	@Test
@@ -105,6 +107,38 @@ class RoomTest {
 		//then
 		assertTrue(availableDates.contains(TO_DATE.plusDays(1)) && availableDates.contains(TO_DATE)
 			&& availableDates.size() == 2);
+	}
+
+	@Test
+	void findAvailableDatesForIntervalAndSizeShouldReturnEmptyListIfNoDates() {
+		//given
+		room.createBooking(FROM_DATE, TO_DATE, EGN);
+		//when
+		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE.minusDays(1), 1);
+
+		//then
+		assertTrue(availableDates.isEmpty());
+	}
+
+	@Test
+	void findAvailableDatesForIntervalAndSizeShouldReturnEmptyListIfBedNotAvailable() {
+		//given
+		room.createBooking(FROM_DATE, TO_DATE, EGN);
+		//when
+		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE.plusDays(1), 2);
+
+		//then
+		assertTrue(availableDates.isEmpty());
+	}
+
+	@Test
+	void checkIfEnoughBedsShouldReturnFalseIfNotEnough(){
+		assertFalse(room.checkIfEnoughBeds(2));
+	}
+
+	@Test
+	void checkIfEnoughBedsShouldReturnTrueIfNumberOfBedsEqualsRequired(){
+		assertTrue(room.checkIfEnoughBeds(1));
 	}
 
 	@Test

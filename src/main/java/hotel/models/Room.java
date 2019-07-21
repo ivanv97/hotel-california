@@ -84,7 +84,8 @@ public class Room {
 	/**
 	 * Creates a booking of the respective room object
 	 * Also calls the prepareCommodities method for the date
-	 * on which the guests are to be expected
+	 * on which the guests are to be expected - Should NOT
+	 * be called directly but through the Hotel class!
 	 *
 	 * @param fromDate  arrival date
 	 * @param toDate    departing date

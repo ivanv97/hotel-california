@@ -17,7 +17,7 @@ class BookingTest {
 	private LocalDate bookingFromDate;
 
 	@Test
-	void constructorShouldCreateIdIfInvalidPassed() {
+	void constructorShouldCreateDefaultIdIfInvalidPassed() {
 		//when
 		booking = new Booking(FROM_DATE, TO_DATE, 123456789L);
 
@@ -37,13 +37,13 @@ class BookingTest {
 	@Test
 	void changeReservationDatesShouldWorkIfDatesAreChronological() {
 		//when
-		booking.changeReservationDates(LocalDate.of(2019,2,1),LocalDate.of(2019,2,2));
+		booking.changeReservationDates(FROM_DATE,TO_DATE);
 		bookingToDate = booking.getToDate();
 		bookingFromDate = booking.getFromDate();
 
 		//then
-		assertThat("Dates are not changed successfully", bookingFromDate, equalTo(LocalDate.of(2019,2,1)));
-		assertThat("Dates are not changed successfully0,", bookingToDate, equalTo(LocalDate.of(2019,2,2)));
+		assertThat("Dates are not changed successfully", bookingFromDate, equalTo(FROM_DATE));
+		assertThat("Dates are not changed successfully0,", bookingToDate, equalTo(TO_DATE));
 	}
 
 	@Test
@@ -66,8 +66,8 @@ class BookingTest {
 		bookingFromDate = booking.getFromDate();
 
 		//then
-		assertThat("Date is null", bookingFromDate, not(equalTo(null)));
-		assertThat("Date is null", bookingToDate, not(equalTo(null)));
+		assertThat("Date is not null", bookingFromDate, not(equalTo(null)));
+		assertThat("Date is not null", bookingToDate, not(equalTo(null)));
 	}
 
 	@Test
