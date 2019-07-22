@@ -1,5 +1,7 @@
 package hotel.models;
 
+import customexceptions.InvalidHotelActionException;
+
 import java.time.LocalDate;
 
 /**
@@ -46,7 +48,7 @@ public class Booking {
 	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId) {
 		this.guestName = guestName;
 		changeReservationDates(fromDate, toDate);
-		this.guestId = guestId /1_000_000_000L >= 1? guestId : -1L ;
+		setGuestId(guestId);
 		bookingNumber = ++lastNumberUsed;
 	}
 
@@ -68,6 +70,15 @@ public class Booking {
 
 	public long getGuestId() {
 		return guestId;
+	}
+
+	public void setGuestId(long guestId) {
+		if(guestId /1_000_000_000L >= 1){
+			this.guestId = guestId;
+		}
+		else{
+			throw new InvalidHotelActionException("Invalid guest ID");
+		}
 	}
 
 	public int getBookingNumber() {

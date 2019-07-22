@@ -1,11 +1,13 @@
 package hotel.models;
 
+import customexceptions.InvalidHotelActionException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BookingTest {
 	//Given
@@ -17,21 +19,23 @@ class BookingTest {
 	private LocalDate bookingFromDate;
 
 	@Test
-	void constructorShouldCreateDefaultIdIfInvalidPassed() {
+	void constructorShouldCreateUniqueBookingNumber() {
 		//when
-		booking = new Booking(FROM_DATE, TO_DATE, 123456789L);
+		booking = new Booking(FROM_DATE, TO_DATE, EGN);
+		Booking booking1 = new Booking(FROM_DATE, TO_DATE, EGN);
 
 		//then
-		assertThat("EGN is 10 digits long", booking.getGuestId(), equalTo(-1L));
+		assertThat("Booking numbers are the same", booking.getBookingNumber(), not(equalTo(booking1.getBookingNumber())));
 	}
 
 	@Test
-	void constructorShouldAssignIdIfValidOnePassed() {
-		//when
-		booking = new Booking(FROM_DATE, TO_DATE, EGN);
+	void setGuestIdShouldSetOnlyValidIds(){
+		assertDoesNotThrow(() ->new Booking(FROM_DATE, TO_DATE, EGN));
+	}
 
-		//then
-		assertThat("EGN is not assigned", booking.getGuestId(), equalTo(EGN));
+	@Test
+	void setGuestIdShouldThrowExceptionWhenIdNotValid(){
+		assertThrows(InvalidHotelActionException.class,() ->new Booking(FROM_DATE, TO_DATE, EGN/10));
 	}
 
 	@Test

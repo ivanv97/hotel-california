@@ -1,28 +1,13 @@
 # Files to be ignored when pushing to GitHub
 
-# COMPILED CLASSES
-*.class
-
-# LOG FILES
-*.log
-
 # MAVEN
 target/
-
-# ECLIPSE
-.project
-.classpath
-.settings/
 
 # INTELLIJ
 .idea/
 *.iml
-.idea/vcs.xml
 
-# GIT
-*.orig
+out/
 
-# OS SPECIFIC
-.DS_Store
-
-# Project-specific
+# Javadoc generated files
+javadoc/
