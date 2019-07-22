@@ -1,8 +1,8 @@
-package hotel.models;
+package eu.deltasource.internship.hotelcalifornia.models;
 
-import customexceptions.InvalidHotelActionException;
-import hotel.commodities.AbstractCommodity;
-import hotel.commodities.Bed;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
+import eu.deltasource.internship.hotelcalifornia.commodities.AbstractCommodity;
+import eu.deltasource.internship.hotelcalifornia.commodities.Bed;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -21,6 +21,7 @@ public class Room {
 	private Set<AbstractCommodity> commodities;
 	private Set<LocalDate> maintenanceDates;
 	private Set<Booking> bookings;
+	private int numberOfBeds;
 
 	/**
 	 * Only constructor of the Room class
@@ -31,7 +32,8 @@ public class Room {
 	 * @param commodities The commodities belonging to the room
 	 */
 	public Room(int number, Set<AbstractCommodity> commodities) {
-		this.commodities = commodities == null ? new HashSet<>() : commodities;
+		this.commodities = new HashSet<>();
+		setCommodities(commodities);
 		setNumber(number);
 		maintenanceDates = new HashSet<>();
 		bookings = new HashSet<>();
@@ -68,6 +70,30 @@ public class Room {
 	}
 
 	/**
+	 * Adds the commodities one by one
+	 * while checking if the current is bed
+	 * and adding to the total room capacity
+	 *
+	 * @param commodities
+	 * @throws InvalidHotelActionException if the commodities passed
+	 *                                     as argument are null
+	 */
+	public void setCommodities(Set<AbstractCommodity> commodities) {
+		if (commodities == null) {
+			throw new InvalidHotelActionException("Cannot set 0 commodities");
+		}
+		this.commodities.clear();
+		numberOfBeds = 0;
+		for (AbstractCommodity commodity : commodities) {
+			this.commodities.add(commodity);
+			if (commodity instanceof Bed) {
+				Bed bed = (Bed) commodity;
+				numberOfBeds += bed.getBedType().getSize();
+			}
+		}
+	}
+
+	/**
 	 * Prepares the commodities -
 	 * adds a maintenance date when this happens
 	 *
@@ -87,16 +113,15 @@ public class Room {
 	 * on which the guests are to be expected - Should NOT
 	 * be called directly but through the Hotel class!
 	 *
-	 * @param fromDate  arrival date
-	 * @param toDate    departing date
-	 * @param guestId   EGN of the guest
+	 * @param fromDate arrival date
+	 * @param toDate   departing date
+	 * @param guestId  EGN of the guest
 	 */
 	public int createBooking(LocalDate fromDate, LocalDate toDate, long guestId) {
 		bookings.add(new Booking(fromDate, toDate, guestId));
 		prepareCommodities(fromDate);
 		return number;
 	}
-
 
 	/**
 	 * Removes booking from the hashset if the specified arguments
@@ -108,7 +133,7 @@ public class Room {
 	 * @throws InvalidHotelActionException if a booking with the specified interval
 	 *                                     does not exists
 	 */
-	public void removeBooking(LocalDate fromDate, LocalDate toDate) throws InvalidHotelActionException {
+	public void removeBooking(LocalDate fromDate, LocalDate toDate) {
 		for (Booking booking : bookings) {
 			if (booking.getFromDate().equals(fromDate) && booking.getToDate().equals(toDate)) {
 				bookings.remove(booking);
@@ -122,6 +147,9 @@ public class Room {
 	/**
 	 * Checks if room is booked
 	 * for a specified interval
+	 * It' considered booked if the from or to date
+	 * is within an existing booking or if the two
+	 * dates coincide with those of a booking
 	 *
 	 * @param fromDate
 	 * @param toDate
@@ -133,9 +161,7 @@ public class Room {
 		if (bookings.isEmpty()) {
 			return false;
 		}
-		//If the from date is within a booking
-		//Or if the to date is within a booking
-		//Or if the from or to date coincide with a booking's dates
+
 		for (Booking booking : bookings) {
 			if ((fromDate.isAfter(booking.getFromDate()) && fromDate.isBefore(booking.getToDate()))
 				|| (toDate.isAfter(booking.getFromDate()) && toDate.isBefore((booking.getToDate())))
@@ -148,6 +174,10 @@ public class Room {
 
 	/**
 	 * Gets the list of available dates of a room
+	 * If no bookings - returns all dates
+	 * Adds or removes the date if it belongs
+	 * to the interval - so we have a proper list
+	 * in the end
 	 *
 	 * @param fromDate     check from date
 	 * @param toDate       check to date
@@ -157,23 +187,16 @@ public class Room {
 	 */
 
 	public List<LocalDate> findAvailableDatesForIntervalAndSize(LocalDate fromDate, LocalDate toDate, int numberOfBeds) {
-		//Return empty arrayList if the bed number does not match
 		if (!checkIfEnoughBeds(numberOfBeds)) {
 			return new ArrayList<>();
 		}
 
-		//If there are no bookings for the room
-		//Return all of the dates in the specified interval
 		if (bookings.isEmpty()) {
 			List<LocalDate> allDates = fromDate.datesUntil(toDate).collect(Collectors.toList());
 			allDates.add(toDate);
 			return allDates;
 		}
 
-		//Iterate through all of the dates in the desired interval
-		//Add or remove it to the final list if it
-		//Satisfies the condition - is after or equal to the booking final date
-		//Is before the booking start date
 		List<LocalDate> availableDates = new ArrayList<>();
 		for (Booking booking : bookings) {
 			for (LocalDate currentDate = fromDate; !currentDate.isAfter(toDate); currentDate = currentDate.plusDays(1)) {
@@ -198,15 +221,7 @@ public class Room {
 	 * false - if they don't
 	 */
 	public boolean checkIfEnoughBeds(int numberOfBeds) {
-		int currentNumberOfBeds = 0;
-		//Get the number of beds in the room
-		for (AbstractCommodity commodity : commodities) {
-			if (commodity instanceof Bed) {
-				Bed bed = (Bed) commodity;
-				currentNumberOfBeds += bed.getBedType().getSize();
-			}
-		}
-		return currentNumberOfBeds == numberOfBeds;
+		return this.numberOfBeds == numberOfBeds;
 	}
 
 	@Override

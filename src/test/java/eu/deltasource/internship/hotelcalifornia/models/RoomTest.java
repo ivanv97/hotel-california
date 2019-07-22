@@ -1,10 +1,12 @@
-package hotel.models;
+package eu.deltasource.internship.hotelcalifornia.models;
 
-import customexceptions.InvalidHotelActionException;
-import hotel.commodities.Bed;
-import hotel.commodities.BedType;
-import hotel.commodities.Shower;
-import hotel.commodities.Toilet;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
+import eu.deltasource.internship.hotelcalifornia.commodities.Bed;
+import eu.deltasource.internship.hotelcalifornia.commodities.BedType;
+import eu.deltasource.internship.hotelcalifornia.commodities.Shower;
+import eu.deltasource.internship.hotelcalifornia.commodities.Toilet;
+import eu.deltasource.internship.hotelcalifornia.models.Hotel;
+import eu.deltasource.internship.hotelcalifornia.models.Room;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +43,7 @@ class RoomTest {
 	@Test
 	void setNumberShouldNotWorkWhenNumberIsNotUnique() {
 		//given, when
-		Room room2 = new Room(room.getNumber(), null);
+		Room room2 = new Room(room.getNumber(), new HashSet<>());
 		//then
 		assertNotEquals(room.getNumber(), room2.getNumber());
 	}
@@ -94,7 +96,7 @@ class RoomTest {
 
 		//Then
 		assertFalse(room.checkIfBooked(TO_DATE, TO_DATE.plusDays(5)));
-		assertFalse(room.checkIfBooked(FROM_DATE.minusDays(5),FROM_DATE));
+		assertFalse(room.checkIfBooked(FROM_DATE.minusDays(5), FROM_DATE));
 	}
 
 	@Test
@@ -122,29 +124,51 @@ class RoomTest {
 
 	@Test
 	void findAvailableDatesForIntervalAndSizeShouldReturnEmptyListIfBedNotAvailable() {
-		//given
+		//When
 		room.createBooking(FROM_DATE, TO_DATE, EGN);
-		//when
-		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE.plusDays(1), 2);
 
-		//then
-		assertTrue(availableDates.isEmpty());
+		//Then
+		assertTrue(room.findAvailableDatesForIntervalAndSize(FROM_DATE,
+			TO_DATE.plusDays(1), 2).isEmpty());
 	}
 
 	@Test
-	void checkIfEnoughBedsShouldReturnFalseIfNotEnough(){
+	void findAvailableDatesForIntervalAndSizeShouldReturnAllDatesIfNoBookings() {
+		//When
+		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE, 1);
+
+		//Then
+		for (LocalDate currentDate = FROM_DATE; !currentDate.isAfter(TO_DATE); currentDate = currentDate.plusDays(1)) {
+			assertTrue(availableDates.contains(currentDate));
+		}
+		assertTrue(availableDates.size() == 5);
+	}
+
+	@Test
+	void setCommoditiesShouldThrowExcIfNullPassed() {
+		assertThrows(InvalidHotelActionException.class, () -> room.setCommodities(null));
+	}
+
+	@Test
+	void setCommoditiesShouldWorkIfProperArgumentPassed() {
+		assertDoesNotThrow(() -> room.setCommodities(new HashSet<>(Arrays.asList(new Shower(), new Bed(BedType.DOUBLE)))));
+		assertTrue(room.checkIfEnoughBeds(2));
+	}
+
+	@Test
+	void checkIfEnoughBedsShouldReturnFalseIfNotEnough() {
 		assertFalse(room.checkIfEnoughBeds(2));
 	}
 
 	@Test
-	void checkIfEnoughBedsShouldReturnTrueIfNumberOfBedsEqualsRequired(){
+	void checkIfEnoughBedsShouldReturnTrueIfNumberOfBedsEqualsRequired() {
 		assertTrue(room.checkIfEnoughBeds(1));
 	}
 
 	@Test
 	void hashCodeShouldBeDifferent() {
 		//when
-		Room room2 = new Room(103, null);
+		Room room2 = new Room(103, new HashSet<>());
 		//then
 		assertNotEquals(room.hashCode(), room2.hashCode());
 	}

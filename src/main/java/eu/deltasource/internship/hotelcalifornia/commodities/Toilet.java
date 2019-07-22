@@ -1,4 +1,4 @@
-package hotel.commodities;
+package eu.deltasource.internship.hotelcalifornia.commodities;
 
 /**
  * Toilet commodity - extends AbstractCommodity

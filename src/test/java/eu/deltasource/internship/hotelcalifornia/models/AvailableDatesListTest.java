@@ -1,5 +1,6 @@
-package hotel.models;
+package eu.deltasource.internship.hotelcalifornia.models;
 
+import eu.deltasource.internship.hotelcalifornia.models.AvailableDatesList;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -13,13 +14,13 @@ class AvailableDatesListTest {
 	@Test
 	void setAvailableDatesShouldCreateEmptyListIfNullPassed() {
 		AvailableDatesList availableDatesList = new AvailableDatesList(null);
-		assertNotEquals(null,availableDatesList.getAvailableDates());
+		assertNotEquals(null, availableDatesList.getAvailableDates());
 	}
 
 	@Test
 	void setAvailableDatesShouldAssignThePassedListIfNotNull() {
 		AvailableDatesList availableDatesList = new AvailableDatesList(new ArrayList<>(Arrays.asList(
-			LocalDate.of(2019,9,9),LocalDate.of(2019,9,10))));
+			LocalDate.of(2019, 9, 9), LocalDate.of(2019, 9, 10))));
 		assertTrue(availableDatesList.getAvailableDates().size() == 2);
 	}
 }

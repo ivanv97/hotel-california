@@ -1,4 +1,4 @@
-package customexceptions;
+package eu.deltasource.internship.hotelcalifornia.customexceptions;
 
 /**
  * Exception which is thrown whenever

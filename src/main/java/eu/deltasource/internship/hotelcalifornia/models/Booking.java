@@ -1,6 +1,6 @@
-package hotel.models;
+package eu.deltasource.internship.hotelcalifornia.models;
 
-import customexceptions.InvalidHotelActionException;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 
 import java.time.LocalDate;
 
@@ -32,7 +32,7 @@ public class Booking {
 	 * @param guestId
 	 */
 	public Booking(LocalDate fromDate, LocalDate toDate, long guestId) {
-		this(fromDate,toDate,UNKNOWN_NAME,guestId);
+		this(fromDate, toDate, UNKNOWN_NAME, guestId);
 	}
 
 	/**
@@ -72,11 +72,16 @@ public class Booking {
 		return guestId;
 	}
 
+	/**
+	 * Set the guestId only if valid
+	 * argument is passed
+	 *
+	 * @param guestId
+	 */
 	public void setGuestId(long guestId) {
-		if(guestId /1_000_000_000L >= 1){
+		if (guestId / 1_000_000_000L >= 1) {
 			this.guestId = guestId;
-		}
-		else{
+		} else {
 			throw new InvalidHotelActionException("Invalid guest ID");
 		}
 	}
@@ -94,7 +99,7 @@ public class Booking {
 	 * @param toDate   the new final date
 	 */
 	public void changeReservationDates(LocalDate fromDate, LocalDate toDate) {
-		if(fromDate != null && toDate != null) {
+		if (fromDate != null && toDate != null) {
 			if (toDate.isAfter(fromDate)) {
 				this.fromDate = fromDate;
 				this.toDate = toDate;

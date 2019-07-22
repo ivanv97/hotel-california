@@ -1,11 +1,7 @@
-package hotel.models;
+package eu.deltasource.internship.hotelcalifornia.models;
 
-import customexceptions.InvalidHotelActionException;
-import hotel.commodities.AbstractCommodity;
-import hotel.commodities.Bed;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 
-import javax.swing.*;
-import java.rmi.registry.LocateRegistry;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -19,18 +15,35 @@ import java.util.*;
  */
 public class Hotel {
 	private static final List<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
+	private static final String UNKNOWN_NAME = "Unknown";
 	private String name;
 	private List<Room> rooms;
 
+	public List<Integer> getBookedRoomsNumbers() {
+		return bookedRoomsNumbers;
+	}
+
+	private List<Integer> bookedRoomsNumbers;
+
 	/**
-	 * Only constructor of the Hotel class
+	 * Constructor with arguments
+	 * for name of the hotel and rooms
 	 *
 	 * @param name  <b>name</b> of the hotel
 	 * @param rooms an array list consisting of all of the <b>rooms</b>z
 	 */
 	public Hotel(String name, List<Room> rooms) {
-		this.name = name == null ? "Unknown" : name;
-		this.rooms = rooms == null ? new ArrayList<>() : rooms;
+		this.name = name;
+		this.rooms = rooms;
+		bookedRoomsNumbers = new ArrayList<>();
+	}
+
+	/**
+	 * Calls the overloaded constructor with
+	 * default values
+	 */
+	public Hotel() {
+		this(UNKNOWN_NAME, new ArrayList<>());
 	}
 
 	public String getName() {
@@ -43,6 +56,15 @@ public class Hotel {
 
 	public List<Room> getRooms() {
 		return rooms;
+	}
+
+	public void addRoom(Room room) {
+		for (Room currentRoom : rooms) {
+			if (currentRoom.getNumber() == room.getNumber()) {
+				throw new InvalidHotelActionException("Cannot have room with the same number");
+			}
+		}
+		rooms.add(room);
 	}
 
 	public static List<Integer> getTakenRoomNumbers() {
@@ -71,9 +93,7 @@ public class Hotel {
 		Map<Room, AvailableDatesList> availableRooms = new HashMap<>();
 		for (Room room : rooms) {
 			List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(fromDate, toDate, numberOfBeds);
-			if (!availableDates.isEmpty()) {
-				availableRooms.put(room, new AvailableDatesList(availableDates));
-			}
+			availableRooms.put(room, new AvailableDatesList(availableDates));
 		}
 		return availableRooms;
 	}
@@ -83,18 +103,19 @@ public class Hotel {
 	 * if such exists for the desired interval
 	 * and number of people per room and is
 	 * not already booked
+	 *
 	 * @param fromDate
 	 * @param toDate
 	 * @param numberOfPeople the number that should match the beds' capacity
 	 * @return List of available rooms for the dates specified
 	 * @throws InvalidHotelActionException when the specified interval does not offer any
-	 * free rooms thus the list remains empty
+	 *                                     free rooms thus the list remains empty
 	 */
-	public List<Room> findAvailableRooms(LocalDate fromDate, LocalDate toDate, int numberOfPeople, List<Integer> alreadyBookedRooms) {
+	public List<Room> findAvailableRooms(LocalDate fromDate, LocalDate toDate, int numberOfPeople) {
 		List<Room> availableRooms = new ArrayList<>();
 		if (toDate.isAfter(fromDate)) {
 			for (Room room : rooms) {
-				if (!alreadyBookedRooms.contains(room.getNumber()) && !room.checkIfBooked(fromDate, toDate)) {
+				if (!bookedRoomsNumbers.contains(room.getNumber()) && !room.checkIfBooked(fromDate, toDate)) {
 					if (room.checkIfEnoughBeds(numberOfPeople)) {
 						availableRooms.add(room);
 					}
@@ -105,5 +126,23 @@ public class Hotel {
 			throw new InvalidHotelActionException("There are no free rooms for the specified interval");
 		}
 		return availableRooms;
+	}
+
+	/**
+	 * Finds all available rooms for the passed dates
+	 * BOoks the first one and returns its number
+	 *
+	 * @param fromDate
+	 * @param toDate
+	 * @param numberOfPeople
+	 * @param reserveeId
+	 * @return the number of the successfully booked room
+	 */
+	public int findAndBookFirstAvailableRoom(LocalDate fromDate, LocalDate toDate, int numberOfPeople, long reserveeId) {
+		List<Room> availableRooms = findAvailableRooms(fromDate, toDate, numberOfPeople);
+		Room roomToBook = availableRooms.get(0);
+		int bookedRoomNumber = roomToBook.createBooking(fromDate, toDate, reserveeId);
+		bookedRoomsNumbers.add(bookedRoomNumber);
+		return bookedRoomNumber;
 	}
 }

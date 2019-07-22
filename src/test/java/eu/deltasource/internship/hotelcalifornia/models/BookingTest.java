@@ -1,6 +1,6 @@
-package hotel.models;
+package eu.deltasource.internship.hotelcalifornia.models;
 
-import customexceptions.InvalidHotelActionException;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -29,19 +29,19 @@ class BookingTest {
 	}
 
 	@Test
-	void setGuestIdShouldSetOnlyValidIds(){
-		assertDoesNotThrow(() ->new Booking(FROM_DATE, TO_DATE, EGN));
+	void setGuestIdShouldSetOnlyValidIds() {
+		assertDoesNotThrow(() -> new Booking(FROM_DATE, TO_DATE, EGN));
 	}
 
 	@Test
-	void setGuestIdShouldThrowExceptionWhenIdNotValid(){
-		assertThrows(InvalidHotelActionException.class,() ->new Booking(FROM_DATE, TO_DATE, EGN/10));
+	void setGuestIdShouldThrowExceptionWhenIdNotValid() {
+		assertThrows(InvalidHotelActionException.class, () -> new Booking(FROM_DATE, TO_DATE, EGN / 10));
 	}
 
 	@Test
 	void changeReservationDatesShouldWorkIfDatesAreChronological() {
 		//when
-		booking.changeReservationDates(FROM_DATE,TO_DATE);
+		booking.changeReservationDates(FROM_DATE, TO_DATE);
 		bookingToDate = booking.getToDate();
 		bookingFromDate = booking.getFromDate();
 
@@ -51,9 +51,9 @@ class BookingTest {
 	}
 
 	@Test
-	void changeReservationDatesShouldFailIfDatesAreNotChronological() {
+	void changeReservationDatesShouldNotAssignNonChronologicalDates() {
 		//when
-		booking.changeReservationDates(TO_DATE,FROM_DATE);
+		booking.changeReservationDates(TO_DATE, FROM_DATE);
 		bookingToDate = booking.getToDate();
 		bookingFromDate = booking.getFromDate();
 
@@ -63,7 +63,7 @@ class BookingTest {
 	}
 
 	@Test
-	void changeReservationDatesShouldFailIfDatesAreNull() {
+	void changeReservationDatesShouldNotAssignNullDates() {
 		//when
 		booking.changeReservationDates(null, null);
 		bookingToDate = booking.getToDate();
