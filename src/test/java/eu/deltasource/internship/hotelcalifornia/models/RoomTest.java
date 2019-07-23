@@ -1,10 +1,7 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
+import eu.deltasource.internship.hotelcalifornia.commodities.*;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
-import eu.deltasource.internship.hotelcalifornia.commodities.Bed;
-import eu.deltasource.internship.hotelcalifornia.commodities.BedType;
-import eu.deltasource.internship.hotelcalifornia.commodities.Shower;
-import eu.deltasource.internship.hotelcalifornia.commodities.Toilet;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.NullCommodityException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RoomTest {
 	private Room room;
+	private Bed bed;
+	private Set<AbstractCommodity> initialCommoditySet;
 	private static final LocalDate FROM_DATE = LocalDate.of(2020, 9, 10);
 	private static final LocalDate TO_DATE = LocalDate.of(2020, 9, 14);
 	private static final long EGN = 1234567893L;
@@ -29,15 +29,16 @@ class RoomTest {
 
 	@BeforeEach
 	void setUp() {
-		room = new Room(ROOM_NUMBER, new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE), new Toilet(), new Shower())));
+		bed = new Bed(BedType.SINGLE);
+		initialCommoditySet = new HashSet<>(Arrays.asList(bed, new Toilet(), new Shower()));
+		room = new Room(ROOM_NUMBER, initialCommoditySet);
 	}
 
 	@AfterEach
 	void tearDown() {
-		room.getBookings().clear();
-		room.getCommodities().clear();
-		room.getMaintenanceDates().clear();
 		Hotel.getTakenRoomNumbers().clear();
+		room.getCommodities().clear();
+		Hotel.getCommodityRoomMap().clear();
 	}
 
 	@Test
@@ -165,8 +166,9 @@ class RoomTest {
 
 	@Test
 	void setCommoditiesShouldWorkIfProperArgumentPassed() {
-		assertDoesNotThrow(() -> room.setCommodities(new HashSet<>(Arrays.asList(new Shower(), new Bed(BedType.DOUBLE)))));
-		assertTrue(room.checkIfEnoughBeds(2));
+		Set<AbstractCommodity> newCommoditySet = new HashSet<>(Arrays.asList(new Shower(), new Bed(BedType.DOUBLE)));
+		room.setCommodities(newCommoditySet);
+		assertEquals(newCommoditySet, room.getCommodities());
 	}
 
 	@Test
@@ -196,6 +198,33 @@ class RoomTest {
 
 		//Then
 		assertEquals(BedType.SINGLE.getSize() + BedType.KING_SIZE.getSize(), room.getCapacity());
+	}
+
+	@Test
+	void addCommodityShouldNotAddDuplicateCommodities() {
+		//When
+		int initialCapacity = room.getCapacity();
+		room.addCommodity(bed);
+
+		//Then
+		assertEquals(initialCapacity, room.getCapacity());
+	}
+
+	@Test
+	void removeCommodityShouldThrowExcIfNullPassed() {
+		assertThrows(NullCommodityException.class, () -> room.removeCommodity(null));
+	}
+
+	@Test
+	void removeCommodityShouldWorkIfProperArgumentPassed() {
+		//When
+		int initialCapacity = room.getCapacity();
+		room.removeCommodity(bed);
+
+		//Then
+		assertFalse(room.getCommodities().contains(bed));
+		assertFalse(Hotel.getCommodityRoomMap().containsKey(bed));
+		assertEquals(initialCapacity - bed.getBedType().getSize(), room.getCapacity());
 	}
 
 	@Test

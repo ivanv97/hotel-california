@@ -1,9 +1,12 @@
 package eu.deltasource.internship.hotelcalifornia.commodities;
 
+import eu.deltasource.internship.hotelcalifornia.models.Hotel;
+
 /**
  * Base class for concrete commodities
  * Declares one abstract method which is to be
  * overriden by subclasses
+ *
  * @author Ivan Velkushanov
  */
 public abstract class AbstractCommodity {

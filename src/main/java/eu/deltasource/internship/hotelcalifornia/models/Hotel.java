@@ -1,6 +1,8 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
+import eu.deltasource.internship.hotelcalifornia.commodities.AbstractCommodity;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.NullCommodityException;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -15,6 +17,7 @@ import java.util.*;
  */
 public class Hotel {
 	private static final List<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
+	private static Map<AbstractCommodity, Room> COMMODITY_ROOM_MAP = new HashMap<>();
 	private static final String UNKNOWN_NAME = "unknown";
 	private String name;
 	private List<Room> rooms;
@@ -49,6 +52,10 @@ public class Hotel {
 
 	public List<Room> getRooms() {
 		return rooms;
+	}
+
+	public static Map<AbstractCommodity, Room> getCommodityRoomMap() {
+		return COMMODITY_ROOM_MAP;
 	}
 
 	/**

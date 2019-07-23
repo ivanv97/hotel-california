@@ -76,9 +76,15 @@ public class Room {
 	}
 
 	/**
-	 * Adds the commodities one by one
-	 * while checking if the current is bed
-	 * and adding to the total room capacity
+	 * Initializes the hash map of commodities
+	 * if it is not already
+	 * First removes the passed set of commodities
+	 * from the hash map in the hotel
+	 * in case any of it belong to another room
+	 * Removes the current commodities
+	 * of the room from the hash map in the Hotel
+	 * and from the set of the room object
+	 * and then adds the new commodities one by one
 	 *
 	 * @param commodities the set of commodities to be assigned
 	 * @throws NullCommodityException if the commodities passed
@@ -88,35 +94,77 @@ public class Room {
 		if (commodities == null) {
 			throw new NullCommodityException("Cannot set 0 commodities to a room");
 		}
-		this.commodities = new HashSet<>();
-		capacity = 0;
+		if (this.commodities == null) {
+			this.commodities = new HashSet<>();
+		}
 		for (AbstractCommodity commodity : commodities) {
-			this.commodities.add(commodity);
-			if (commodity instanceof Bed) {
-				Bed bed = (Bed) commodity;
-				capacity += bed.getBedType().getSize();
-			}
+			Hotel.getCommodityRoomMap().remove(commodity);
+		}
+		for (AbstractCommodity commodity : this.commodities) {
+			Hotel.getCommodityRoomMap().remove(commodity);
+		}
+		this.commodities.clear();
+		this.capacity = 0;
+		for (AbstractCommodity commodity : commodities) {
+			addCommodity(commodity);
 		}
 	}
 
 	/**
-	 * Adds commodity to the existing set
+	 * If the commodity already belongs to the
+	 * room - does nothing. Else it frees up
+	 * the commodity (removes it from commodityRoomMap)
+	 * and adds commodity to the existing set
+	 * and respectively to the map of the hotel class
+	 * with object value being the current room
 	 * If commodity happens to be bed -
 	 * it increments the capacity by the
 	 * bed size
 	 *
 	 * @param commodity the commodity to be added to the set
-	 * @throws InvalidHotelActionException When trying
-	 *                                     to pass a null reference
+	 * @throws NullCommodityException When trying
+	 *                                to pass a null reference
 	 */
 	public void addCommodity(AbstractCommodity commodity) {
 		if (commodity == null) {
 			throw new NullCommodityException("Cannot add null commodity");
 		}
+		if (Hotel.getCommodityRoomMap().containsKey(commodity)) {
+			Room currentRoom = Hotel.getCommodityRoomMap().get(commodity);
+			if (currentRoom != null && currentRoom.equals(this)) {
+				return;
+			}
+		}
+		removeCommodity(commodity);
 		this.commodities.add(commodity);
 		if (commodity instanceof Bed) {
 			Bed bed = (Bed) commodity;
 			capacity += bed.getBedType().getSize();
+		}
+		Hotel.getCommodityRoomMap().put(commodity, this);
+	}
+
+	/**
+	 * Removes commodity from the existing
+	 * set and the hash map in the hotel
+	 * and decreases the capacity of the
+	 * room if the commodity is bed
+	 *
+	 * @param commodity the commodity to be removed
+	 * @throws NullCommodityException when trying to pass
+	 *                                null reference
+	 */
+	public void removeCommodity(AbstractCommodity commodity) {
+		if (commodity == null) {
+			throw new NullCommodityException("Cannot remove non-existing commodity");
+		}
+		if (this.commodities.contains(commodity)) {
+			this.commodities.remove(commodity);
+			if (commodity instanceof Bed) {
+				Bed bed = (Bed) commodity;
+				capacity -= bed.getBedType().getSize();
+			}
+			Hotel.getCommodityRoomMap().remove(commodity);
 		}
 	}
 
