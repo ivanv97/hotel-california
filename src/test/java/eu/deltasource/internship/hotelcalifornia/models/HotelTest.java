@@ -33,11 +33,11 @@ class HotelTest {
 	}
 
 	@Test
-	void constructorShouldSetDefaultValuesWhenNpArguments() {
+	void constructorShouldSetDefaultValuesWhenNoArguments() {
 		//when
 		Hotel hotelWithNull = new Hotel();
 		//then
-		assertEquals("Unknown", hotelWithNull.getName());
+		assertEquals("unknown", hotelWithNull.getName());
 		assertTrue(hotelWithNull.getRooms().isEmpty());
 	}
 
@@ -64,15 +64,14 @@ class HotelTest {
 
 	@Test
 	void getFreeRoomsAndDatesShouldWorkIfAvailableDates() {
-		Map<Room, AvailableDatesList> roomsAndDates = null;
 		//when
 		room.createBooking(FROM_DATE.plusDays(1), TO_DATE.plusDays(2), GUEST_ID);
-		roomsAndDates = hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ROOM_CAPACITY);
+		Map<Room, AvailableDatesList> roomsAndDates = hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ROOM_CAPACITY);
 
 		//then
 		assertDoesNotThrow(() -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ROOM_CAPACITY));
-		assertTrue(roomsAndDates.get(room).getAvailableDates().contains(FROM_DATE)
-			&& roomsAndDates.get(room).getAvailableDates().size() == 1);
+		assertTrue(roomsAndDates.get(room).getAvailableDates().contains(FROM_DATE));
+		assertEquals(1, roomsAndDates.get(room).getAvailableDates().size());
 	}
 
 	@Test
@@ -128,7 +127,7 @@ class HotelTest {
 	}
 
 	@Test
-	void addRoomShouldWorkWhenNumberIsUnique() {
+	void addRoomShouldWorkWhenRoomAddedIsDifferent() {
 		//When
 		Room room1 = new Room(102, new HashSet<>());
 
@@ -137,7 +136,7 @@ class HotelTest {
 	}
 
 	@Test
-	void addRoomShouldThrowExcWhenNumberIsAlreadyUsed() {
+	void addRoomShouldThrowExcWhenAddingTheSameRoom() {
 		assertThrows(InvalidHotelActionException.class, () -> hotel.addRoom(room));
 	}
 
@@ -160,5 +159,4 @@ class HotelTest {
 		assertThrows(InvalidHotelActionException.class, () -> hotel.findAndBookFirstAvailableRoom(FROM_DATE,
 			TO_DATE.plusDays(2), ROOM_CAPACITY, GUEST_ID));
 	}
-
 }

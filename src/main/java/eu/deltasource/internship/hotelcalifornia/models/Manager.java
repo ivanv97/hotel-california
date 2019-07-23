@@ -70,7 +70,6 @@ public class Manager {
 	/**
 	 * Identifies a booking by its start and end date and
 	 * removes the booking from the specified room
-	 * Removes the room number from the bookedRoomsNumbers
 	 *
 	 * @param fromDate   booking with this fromDate
 	 * @param toDate     booking with this toDate
@@ -84,7 +83,6 @@ public class Manager {
 		for (Room room : hotel.getRooms()) {
 			if (room.getNumber() == roomNumber) {
 				room.removeBooking(fromDate, toDate);
-				hotel.getBookedRoomsNumbers().remove(Integer.valueOf(roomNumber));
 				return roomNumber;
 			}
 		}

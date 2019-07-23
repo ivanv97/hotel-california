@@ -15,15 +15,9 @@ import java.util.*;
  */
 public class Hotel {
 	private static final List<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
-	private static final String UNKNOWN_NAME = "Unknown";
+	private static final String UNKNOWN_NAME = "unknown";
 	private String name;
 	private List<Room> rooms;
-
-	public List<Integer> getBookedRoomsNumbers() {
-		return bookedRoomsNumbers;
-	}
-
-	private List<Integer> bookedRoomsNumbers;
 
 	/**
 	 * Constructor with arguments
@@ -35,7 +29,6 @@ public class Hotel {
 	public Hotel(String name, List<Room> rooms) {
 		this.name = name;
 		this.rooms = rooms;
-		bookedRoomsNumbers = new ArrayList<>();
 	}
 
 	/**
@@ -58,9 +51,18 @@ public class Hotel {
 		return rooms;
 	}
 
+	/**
+	 * Add new room to the hotel -
+	 * if we try to add the same room
+	 * the method fails
+	 *
+	 * @param room the new room to be added
+	 * @throws InvalidHotelActionException when we try to add
+	 *                                     the same room twice
+	 */
 	public void addRoom(Room room) {
 		for (Room currentRoom : rooms) {
-			if (currentRoom.getNumber() == room.getNumber()) {
+			if (currentRoom.equals(room)) {
 				throw new InvalidHotelActionException("Cannot have room with the same number");
 			}
 		}
@@ -120,7 +122,7 @@ public class Hotel {
 		List<Room> availableRooms = new ArrayList<>();
 		if (toDate.isAfter(fromDate)) {
 			for (Room room : rooms) {
-				if (!bookedRoomsNumbers.contains(room.getNumber()) && !room.checkIfBooked(fromDate, toDate)) {
+				if (!room.checkIfBooked(fromDate, toDate)) {
 					if (room.checkIfEnoughBeds(numberOfPeople)) {
 						availableRooms.add(room);
 					}
@@ -146,8 +148,6 @@ public class Hotel {
 	public int findAndBookFirstAvailableRoom(LocalDate fromDate, LocalDate toDate, int numberOfPeople, long reserveeId) {
 		List<Room> availableRooms = findAvailableRooms(fromDate, toDate, numberOfPeople);
 		Room roomToBook = availableRooms.get(0);
-		int bookedRoomNumber = roomToBook.createBooking(fromDate, toDate, reserveeId);
-		bookedRoomsNumbers.add(bookedRoomNumber);
-		return bookedRoomNumber;
+		return roomToBook.createBooking(fromDate, toDate, reserveeId);
 	}
 }

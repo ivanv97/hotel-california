@@ -28,7 +28,6 @@ class ManagerTest {
 	void tearDown() {
 		hotel.getRooms().clear();
 		Hotel.getTakenRoomNumbers().clear();
-		hotel.getBookedRoomsNumbers().clear();
 	}
 
 	@Test

@@ -34,7 +34,7 @@ class BookingTest {
 	}
 
 	@Test
-	void setGuestIdShouldThrowExceptionWhenIdNotValid() {
+	void setGuestIdShouldThrowExceptionIfIdNotValid() {
 		assertThrows(BookingActionException.class, () -> new Booking(FROM_DATE, TO_DATE, EGN / 10));
 	}
 
@@ -77,7 +77,7 @@ class BookingTest {
 	@Test
 	void hashCodeShouldBeDifferent() {
 		//when
-		Booking booking2 = new Booking(FROM_DATE, TO_DATE, 1234567897L);
+		Booking booking2 = new Booking(FROM_DATE, TO_DATE, EGN);
 
 		//then
 		assertThat("Hash codes are the same!", booking.hashCode(), not(equalTo(booking2.hashCode())));

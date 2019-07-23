@@ -25,35 +25,37 @@ class RoomTest {
 	private static final LocalDate FROM_DATE = LocalDate.of(2020, 9, 10);
 	private static final LocalDate TO_DATE = LocalDate.of(2020, 9, 14);
 	private static final long EGN = 1234567893L;
+	private static final int ROOM_NUMBER = 102;
 
 	@BeforeEach
 	void setUp() {
-		room = new Room(102, new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE), new Toilet(), new Shower())));
+		room = new Room(ROOM_NUMBER, new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE), new Toilet(), new Shower())));
 	}
 
 	@AfterEach
 	void tearDown() {
 		room.getBookings().clear();
 		room.getCommodities().clear();
+		room.getMaintenanceDates().clear();
 		Hotel.getTakenRoomNumbers().clear();
 	}
 
 	@Test
 	void setNumberShouldWorkWhenNumberIsUnique() {
-		assertEquals(102, room.getNumber());
+		assertEquals(ROOM_NUMBER, room.getNumber());
 	}
 
 	@Test
 	void setNumberShouldNotWorkWhenNumberIsNotUnique() {
 		//given, when
-		Room room2 = new Room(room.getNumber(), new HashSet<>());
+		Room room2 = new Room(ROOM_NUMBER, new HashSet<>());
 
 		//then
-		assertNotEquals(room.getNumber(), room2.getNumber());
+		assertNotEquals(ROOM_NUMBER, room2.getNumber());
 	}
 
 	@Test
-	void prepareCommodities() {
+	void prepareCommoditiesShouldAddMaintenanceDate() {
 		//when
 		room.prepareCommodities(FROM_DATE);
 
@@ -90,6 +92,7 @@ class RoomTest {
 		room.createBooking(FROM_DATE, TO_DATE, EGN);
 
 		//then
+		assertTrue(room.checkIfBooked(FROM_DATE, TO_DATE));
 		assertTrue(room.checkIfBooked(FROM_DATE.plusDays(1), TO_DATE));
 		assertTrue(room.checkIfBooked(FROM_DATE, TO_DATE.minusDays(1)));
 	}
@@ -102,6 +105,8 @@ class RoomTest {
 		//Then
 		assertFalse(room.checkIfBooked(TO_DATE, TO_DATE.plusDays(5)));
 		assertFalse(room.checkIfBooked(FROM_DATE.minusDays(5), FROM_DATE));
+		assertFalse(room.checkIfBooked(TO_DATE.plusDays(2), TO_DATE.plusDays(5)));
+		assertFalse(room.checkIfBooked(FROM_DATE.minusDays(5), FROM_DATE.minusDays(2)));
 	}
 
 	@Test
@@ -113,8 +118,9 @@ class RoomTest {
 		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE.plusDays(1), 1);
 
 		//Then
-		assertTrue(availableDates.contains(TO_DATE.plusDays(1)) && availableDates.contains(TO_DATE)
-			&& availableDates.size() == 2);
+		assertTrue(availableDates.contains(TO_DATE));
+		assertTrue(availableDates.contains(TO_DATE.plusDays(1)));
+		assertEquals(2, availableDates.size());
 	}
 
 	@Test
@@ -164,7 +170,7 @@ class RoomTest {
 	}
 
 	@Test
-	void addCommodityShouldThrowExcWhenNullPassed() {
+	void addCommodityShouldThrowExcIfNullPassed() {
 		assertThrows(NullCommodityException.class, () -> room.addCommodity(null));
 	}
 
@@ -189,7 +195,7 @@ class RoomTest {
 		room.addCommodity(bed);
 
 		//Then
-		assertEquals(3, room.getCapacity());
+		assertEquals(BedType.SINGLE.getSize() + BedType.KING_SIZE.getSize(), room.getCapacity());
 	}
 
 	@Test
@@ -205,7 +211,7 @@ class RoomTest {
 	@Test
 	void hashCodeShouldBeDifferent() {
 		//When
-		Room room2 = new Room(103, new HashSet<>());
+		Room room2 = new Room(ROOM_NUMBER + 1, new HashSet<>());
 
 		//Then
 		assertNotEquals(room.hashCode(), room2.hashCode());
