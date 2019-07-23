@@ -1,6 +1,6 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
-import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
 
 import java.time.LocalDate;
 
@@ -27,9 +27,9 @@ public class Booking {
 	 * unknown - calls overloaded version of the constructor
 	 * which assigns "unknown" to guestName
 	 *
-	 * @param fromDate
-	 * @param toDate
-	 * @param guestId
+	 * @param fromDate stay from
+	 * @param toDate   stay to
+	 * @param guestId  EGN
 	 */
 	public Booking(LocalDate fromDate, LocalDate toDate, long guestId) {
 		this(fromDate, toDate, UNKNOWN_NAME, guestId);
@@ -40,10 +40,10 @@ public class Booking {
 	 * guestName as well and assigns the argument passed
 	 * to the private field guestName
 	 *
-	 * @param fromDate
-	 * @param toDate
-	 * @param guestName
-	 * @param guestId
+	 * @param fromDate  stay from
+	 * @param toDate    stay to
+	 * @param guestName name of the guest
+	 * @param guestId   EGN of the guest
 	 */
 	public Booking(LocalDate fromDate, LocalDate toDate, String guestName, long guestId) {
 		this.guestName = guestName;
@@ -76,13 +76,13 @@ public class Booking {
 	 * Set the guestId only if valid
 	 * argument is passed
 	 *
-	 * @param guestId
+	 * @param guestId Valid EGN
 	 */
 	public void setGuestId(long guestId) {
 		if (guestId / 1_000_000_000L >= 1) {
 			this.guestId = guestId;
 		} else {
-			throw new InvalidHotelActionException("Invalid guest ID");
+			throw new BookingActionException("Invalid guest ID");
 		}
 	}
 

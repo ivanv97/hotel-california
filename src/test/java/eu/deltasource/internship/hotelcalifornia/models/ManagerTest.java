@@ -1,9 +1,10 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
+import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 import eu.deltasource.internship.hotelcalifornia.commodities.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -12,11 +13,11 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ManagerTest {
-	private static Hotel hotel;
-	private static Manager manager;
+	private Hotel hotel;
+	private Manager manager;
 
-	@BeforeAll
-	static void setUp() {
+	@BeforeEach
+	void setUp() {
 		hotel = new Hotel();
 		manager = new Manager("Ivan");
 		manager.setHotel(hotel);
@@ -28,6 +29,22 @@ class ManagerTest {
 		hotel.getRooms().clear();
 		Hotel.getTakenRoomNumbers().clear();
 		hotel.getBookedRoomsNumbers().clear();
+	}
+
+	@Test
+	void setHotelShouldWorkIfActualHotelPassed() {
+		//Given
+		manager = new Manager("Velkushanov");
+
+		//When
+
+		//Then
+		assertDoesNotThrow(() -> manager.setHotel(hotel));
+	}
+
+	@Test
+	void setHotelShouldThrowExcWhenNullPassed() {
+		assertThrows(InvalidHotelActionException.class, () -> manager.setHotel(null));
 	}
 
 	@Test
@@ -117,7 +134,7 @@ class ManagerTest {
 			LocalDate.of(2020, 1, 2), 1234567891L);
 
 		//Then
-		assertThrows(InvalidHotelActionException.class, () -> manager.removeBooking(LocalDate.of(2020, 1, 1),
+		assertThrows(BookingActionException.class, () -> manager.removeBooking(LocalDate.of(2020, 1, 1),
 			LocalDate.of(2020, 1, 3), 101));
 	}
 
@@ -132,7 +149,7 @@ class ManagerTest {
 			LocalDate.of(2020, 1, 2), 1234567891L);
 
 		//Then
-		assertThrows(InvalidHotelActionException.class, () -> manager.removeBooking(LocalDate.of(2020, 1, 1),
+		assertThrows(BookingActionException.class, () -> manager.removeBooking(LocalDate.of(2020, 1, 1),
 			LocalDate.of(2020, 1, 2), 102));
 	}
 

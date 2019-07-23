@@ -1,6 +1,6 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
-import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -35,7 +35,7 @@ class BookingTest {
 
 	@Test
 	void setGuestIdShouldThrowExceptionWhenIdNotValid() {
-		assertThrows(InvalidHotelActionException.class, () -> new Booking(FROM_DATE, TO_DATE, EGN / 10));
+		assertThrows(BookingActionException.class, () -> new Booking(FROM_DATE, TO_DATE, EGN / 10));
 	}
 
 	@Test

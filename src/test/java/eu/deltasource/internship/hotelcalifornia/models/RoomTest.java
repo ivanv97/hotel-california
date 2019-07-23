@@ -1,12 +1,11 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
-import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
 import eu.deltasource.internship.hotelcalifornia.commodities.Bed;
 import eu.deltasource.internship.hotelcalifornia.commodities.BedType;
 import eu.deltasource.internship.hotelcalifornia.commodities.Shower;
 import eu.deltasource.internship.hotelcalifornia.commodities.Toilet;
-import eu.deltasource.internship.hotelcalifornia.models.Hotel;
-import eu.deltasource.internship.hotelcalifornia.models.Room;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.NullCommodityException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,10 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RoomTest {
@@ -32,6 +34,7 @@ class RoomTest {
 	@AfterEach
 	void tearDown() {
 		room.getBookings().clear();
+		room.getCommodities().clear();
 		Hotel.getTakenRoomNumbers().clear();
 	}
 
@@ -44,6 +47,7 @@ class RoomTest {
 	void setNumberShouldNotWorkWhenNumberIsNotUnique() {
 		//given, when
 		Room room2 = new Room(room.getNumber(), new HashSet<>());
+
 		//then
 		assertNotEquals(room.getNumber(), room2.getNumber());
 	}
@@ -52,6 +56,7 @@ class RoomTest {
 	void prepareCommodities() {
 		//when
 		room.prepareCommodities(FROM_DATE);
+
 		//then
 		assertTrue(room.getMaintenanceDates().contains(FROM_DATE));
 	}
@@ -71,7 +76,7 @@ class RoomTest {
 		room.createBooking(FROM_DATE, TO_DATE, EGN);
 
 		//Then
-		assertThrows(InvalidHotelActionException.class, () -> room.removeBooking(FROM_DATE.plusDays(1), TO_DATE));
+		assertThrows(BookingActionException.class, () -> room.removeBooking(FROM_DATE.plusDays(1), TO_DATE));
 	}
 
 	@Test
@@ -101,29 +106,33 @@ class RoomTest {
 
 	@Test
 	void findAvailableDatesForIntervalAndSizeShouldReturnOnlySomeDates() {
-		//given
+		//Given
 		room.createBooking(FROM_DATE, TO_DATE, EGN);
-		//when
+
+		//When
 		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE.plusDays(1), 1);
 
-		//then
+		//Then
 		assertTrue(availableDates.contains(TO_DATE.plusDays(1)) && availableDates.contains(TO_DATE)
 			&& availableDates.size() == 2);
 	}
 
 	@Test
 	void findAvailableDatesForIntervalAndSizeShouldReturnEmptyListIfNoDates() {
-		//given
+		//Given
 		room.createBooking(FROM_DATE, TO_DATE, EGN);
-		//when
+
+		//When
 		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE.minusDays(1), 1);
 
-		//then
+		//Then
 		assertTrue(availableDates.isEmpty());
 	}
 
 	@Test
 	void findAvailableDatesForIntervalAndSizeShouldReturnEmptyListIfBedNotAvailable() {
+		//Given
+
 		//When
 		room.createBooking(FROM_DATE, TO_DATE, EGN);
 
@@ -136,23 +145,51 @@ class RoomTest {
 	void findAvailableDatesForIntervalAndSizeShouldReturnAllDatesIfNoBookings() {
 		//When
 		List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(FROM_DATE, TO_DATE, 1);
+		List<LocalDate> allDates = FROM_DATE.datesUntil(TO_DATE).collect(Collectors.toList());
+		allDates.add(TO_DATE);
 
 		//Then
-		for (LocalDate currentDate = FROM_DATE; !currentDate.isAfter(TO_DATE); currentDate = currentDate.plusDays(1)) {
-			assertTrue(availableDates.contains(currentDate));
-		}
-		assertTrue(availableDates.size() == 5);
+		assertThat("Not all of the dates were returned.", availableDates, equalTo(allDates));
 	}
 
 	@Test
 	void setCommoditiesShouldThrowExcIfNullPassed() {
-		assertThrows(InvalidHotelActionException.class, () -> room.setCommodities(null));
+		assertThrows(NullCommodityException.class, () -> room.setCommodities(null));
 	}
 
 	@Test
 	void setCommoditiesShouldWorkIfProperArgumentPassed() {
 		assertDoesNotThrow(() -> room.setCommodities(new HashSet<>(Arrays.asList(new Shower(), new Bed(BedType.DOUBLE)))));
 		assertTrue(room.checkIfEnoughBeds(2));
+	}
+
+	@Test
+	void addCommodityShouldThrowExcWhenNullPassed() {
+		assertThrows(NullCommodityException.class, () -> room.addCommodity(null));
+	}
+
+	@Test
+	void addCommodityShouldWorkIfProperArgumentPassed() {
+		//Given
+		Shower shower = new Shower();
+
+		//When
+		room.addCommodity(shower);
+
+		//Then
+		assertTrue(room.getCommodities().contains(shower));
+	}
+
+	@Test
+	void addCommodityShouldIncrementCapacityIfBedPassed() {
+		//Given
+		Bed bed = new Bed(BedType.KING_SIZE);
+
+		//When
+		room.addCommodity(bed);
+
+		//Then
+		assertEquals(3, room.getCapacity());
 	}
 
 	@Test
@@ -167,17 +204,19 @@ class RoomTest {
 
 	@Test
 	void hashCodeShouldBeDifferent() {
-		//when
+		//When
 		Room room2 = new Room(103, new HashSet<>());
-		//then
+
+		//Then
 		assertNotEquals(room.hashCode(), room2.hashCode());
 	}
 
 	@Test
 	void equalsShouldReturnTrueWhenComparingBooksWithSameHash() {
-		//when
+		//When
 		Room room2 = room;
-		//then
+
+		//Then
 		assertEquals(room, room2);
 	}
 

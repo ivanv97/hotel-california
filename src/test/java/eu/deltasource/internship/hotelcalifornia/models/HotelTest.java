@@ -15,7 +15,7 @@ class HotelTest {
 	private static final LocalDate FROM_DATE = LocalDate.of(2019, 7, 19);
 	private static final LocalDate TO_DATE = LocalDate.of(2019, 7, 20);
 	private static final int NUMBER_OF_DAYS = 1;
-	private static final int ACTUAL_BED_NUMBER = 1;
+	private static final int ROOM_CAPACITY = 1;
 	private static final long GUEST_ID = 1234567895L;
 	private Set<AbstractCommodity> roomCommodities = new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE),
 		new Shower(), new Toilet()));
@@ -52,14 +52,14 @@ class HotelTest {
 	void getFreeRoomsAndDatesShouldThrowExIfDayNumberIsNotValid() {
 		//then
 		assertThrows(InvalidHotelActionException.class,
-			() -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS + 4, ACTUAL_BED_NUMBER));
+			() -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS + 4, ROOM_CAPACITY));
 	}
 
 	@Test
 	void getFreeRoomsAndDatesShouldReturnEmptyListIfNotEnoughBeds() {
 		//then
-		assertTrue(hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS,
-			ACTUAL_BED_NUMBER + 1).get(room).getAvailableDates().isEmpty());
+		assertThrows(InvalidHotelActionException.class, () -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS,
+			ROOM_CAPACITY + 1));
 	}
 
 	@Test
@@ -67,27 +67,22 @@ class HotelTest {
 		Map<Room, AvailableDatesList> roomsAndDates = null;
 		//when
 		room.createBooking(FROM_DATE.plusDays(1), TO_DATE.plusDays(2), GUEST_ID);
-		roomsAndDates = hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ACTUAL_BED_NUMBER);
+		roomsAndDates = hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ROOM_CAPACITY);
 
 		//then
-		assertDoesNotThrow(() -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ACTUAL_BED_NUMBER));
+		assertDoesNotThrow(() -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ROOM_CAPACITY));
 		assertTrue(roomsAndDates.get(room).getAvailableDates().contains(FROM_DATE)
 			&& roomsAndDates.get(room).getAvailableDates().size() == 1);
 	}
 
 	@Test
-	void getFreeRoomsAndDatesShouldReturnEmptyValuesInMapIfNoAvailableDates() {
+	void getFreeRoomsAndDatesShouldThrowExceptionIfNoAvailableDates() {
 		//Given
 		room.createBooking(FROM_DATE.minusDays(9), TO_DATE.plusDays(2), GUEST_ID);
 
 		//When
-		Map<Room, AvailableDatesList> roomsAndDates = hotel.getFreeRoomsAndDates(FROM_DATE,
-			TO_DATE.plusDays(1), NUMBER_OF_DAYS + 1, ACTUAL_BED_NUMBER);
-
-		//Then
-		for (Room currentRoom : roomsAndDates.keySet()) {
-			assertTrue(roomsAndDates.get(currentRoom).getAvailableDates().isEmpty());
-		}
+		assertThrows(InvalidHotelActionException.class, () -> hotel.getFreeRoomsAndDates(FROM_DATE,
+			TO_DATE.plusDays(1), NUMBER_OF_DAYS + 1, ROOM_CAPACITY));
 	}
 
 	@Test
@@ -96,7 +91,7 @@ class HotelTest {
 		room.createBooking(FROM_DATE.plusDays(1), TO_DATE.plusDays(2), GUEST_ID);
 
 		//When
-		List<Room> availableRooms = hotel.findAvailableRooms(TO_DATE.plusDays(3), TO_DATE.plusDays(5), ACTUAL_BED_NUMBER);
+		List<Room> availableRooms = hotel.findAvailableRooms(TO_DATE.plusDays(3), TO_DATE.plusDays(5), ROOM_CAPACITY);
 
 		//Then
 		assertFalse(availableRooms.isEmpty());
@@ -109,7 +104,7 @@ class HotelTest {
 
 		//Then
 		assertThrows(InvalidHotelActionException.class, () -> hotel.findAvailableRooms(FROM_DATE.minusDays(2), TO_DATE.plusDays(1),
-			ACTUAL_BED_NUMBER));
+			ROOM_CAPACITY));
 	}
 
 	@Test
@@ -119,7 +114,7 @@ class HotelTest {
 
 		//When
 		assertThrows(InvalidHotelActionException.class, () -> hotel.findAvailableRooms(TO_DATE.plusDays(3), TO_DATE.plusDays(5),
-			ACTUAL_BED_NUMBER + 2));
+			ROOM_CAPACITY + 2));
 	}
 
 	@Test
@@ -129,7 +124,7 @@ class HotelTest {
 
 		//Then
 		assertThrows(InvalidHotelActionException.class, () -> hotel.findAvailableRooms(TO_DATE.plusDays(3), TO_DATE.plusDays(1),
-			ACTUAL_BED_NUMBER));
+			ROOM_CAPACITY));
 	}
 
 	@Test
@@ -145,4 +140,25 @@ class HotelTest {
 	void addRoomShouldThrowExcWhenNumberIsAlreadyUsed() {
 		assertThrows(InvalidHotelActionException.class, () -> hotel.addRoom(room));
 	}
+
+	@Test
+	void findAndBookFirstAvailableRoomShouldReturnNumberIfFreeRoom() {
+		//When
+		room.createBooking(FROM_DATE.minusDays(3), TO_DATE, GUEST_ID);
+
+		//Then
+		assertEquals(room.getNumber(), hotel.findAndBookFirstAvailableRoom(TO_DATE,
+			TO_DATE.plusDays(2), ROOM_CAPACITY, GUEST_ID));
+	}
+
+	@Test
+	void findAndBookFirstAvailableRoomShouldThrowExcIfNoAvailableRooms() {
+		//When
+		room.createBooking(FROM_DATE.minusDays(3), TO_DATE, GUEST_ID);
+
+		//Then
+		assertThrows(InvalidHotelActionException.class, () -> hotel.findAndBookFirstAvailableRoom(FROM_DATE,
+			TO_DATE.plusDays(2), ROOM_CAPACITY, GUEST_ID));
+	}
+
 }

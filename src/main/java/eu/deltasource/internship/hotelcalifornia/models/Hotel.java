@@ -90,12 +90,17 @@ public class Hotel {
 		if (numberOfDays != (toDate.getDayOfYear() - fromDate.getDayOfYear())) {
 			throw new InvalidHotelActionException("Number of days does not correspond with selected dates!");
 		}
-		Map<Room, AvailableDatesList> availableRooms = new HashMap<>();
+		Map<Room, AvailableDatesList> availableRoomsAndDates = new HashMap<>();
 		for (Room room : rooms) {
 			List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(fromDate, toDate, numberOfBeds);
-			availableRooms.put(room, new AvailableDatesList(availableDates));
+			if (!availableDates.isEmpty()) {
+				availableRoomsAndDates.put(room, new AvailableDatesList(availableDates));
+			}
 		}
-		return availableRooms;
+		if (availableRoomsAndDates.isEmpty()) {
+			throw new InvalidHotelActionException("No rooms and dates were found for the desired specifications.");
+		}
+		return availableRoomsAndDates;
 	}
 
 	/**
@@ -104,8 +109,8 @@ public class Hotel {
 	 * and number of people per room and is
 	 * not already booked
 	 *
-	 * @param fromDate
-	 * @param toDate
+	 * @param fromDate       start of the interval
+	 * @param toDate         end of the interval
 	 * @param numberOfPeople the number that should match the beds' capacity
 	 * @return List of available rooms for the dates specified
 	 * @throws InvalidHotelActionException when the specified interval does not offer any
@@ -132,10 +137,10 @@ public class Hotel {
 	 * Finds all available rooms for the passed dates
 	 * BOoks the first one and returns its number
 	 *
-	 * @param fromDate
-	 * @param toDate
-	 * @param numberOfPeople
-	 * @param reserveeId
+	 * @param fromDate       book from
+	 * @param toDate         book to
+	 * @param numberOfPeople for capacity
+	 * @param reserveeId     guestID
 	 * @return the number of the successfully booked room
 	 */
 	public int findAndBookFirstAvailableRoom(LocalDate fromDate, LocalDate toDate, int numberOfPeople, long reserveeId) {

@@ -1,5 +1,6 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
+import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 
 import java.time.LocalDate;
@@ -39,8 +40,13 @@ public class Manager {
 	 * to a manager (one to one relationship)
 	 *
 	 * @param hotel hotel instance parameter
+	 * @throws InvalidHotelActionException if the argument
+	 *                                     passed is null
 	 */
 	public void setHotel(Hotel hotel) {
+		if (hotel == null) {
+			throw new InvalidHotelActionException("Hotel set to manager cannot be null");
+		}
 		this.hotel = hotel;
 	}
 
@@ -58,21 +64,21 @@ public class Manager {
 	 *                                     throw exception if there are no free rooms
 	 */
 	public int createBooking(LocalDate fromDate, LocalDate toDate, int numberOfPeople, long reserveeId) {
-		int bookedRoomNumber = hotel.findAndBookFirstAvailableRoom(fromDate, toDate, numberOfPeople, reserveeId);
-		return bookedRoomNumber;
+		return hotel.findAndBookFirstAvailableRoom(fromDate, toDate, numberOfPeople, reserveeId);
 	}
 
 	/**
-	 * Removes booking from the specified room
+	 * Identifies a booking by its start and end date and
+	 * removes the booking from the specified room
 	 * Removes the room number from the bookedRoomsNumbers
 	 *
-	 * @param fromDate
-	 * @param toDate
-	 * @param roomNumber
+	 * @param fromDate   booking with this fromDate
+	 * @param toDate     booking with this toDate
+	 * @param roomNumber booking should be in this room
 	 * @return the number of the room if
 	 * its booking was successfully removed
-	 * @throws InvalidHotelActionException when a booking
-	 *                                     was not found for the given arguments
+	 * @throws BookingActionException when a booking
+	 *                                was not found for the given arguments
 	 */
 	public int removeBooking(LocalDate fromDate, LocalDate toDate, int roomNumber) {
 		for (Room room : hotel.getRooms()) {
@@ -82,6 +88,6 @@ public class Manager {
 				return roomNumber;
 			}
 		}
-		throw new InvalidHotelActionException("No such booking for the specified room number!");
+		throw new BookingActionException("No such booking for the specified room number!");
 	}
 }

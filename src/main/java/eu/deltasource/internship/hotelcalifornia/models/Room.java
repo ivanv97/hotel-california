@@ -1,8 +1,10 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
+import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 import eu.deltasource.internship.hotelcalifornia.commodities.AbstractCommodity;
 import eu.deltasource.internship.hotelcalifornia.commodities.Bed;
+import eu.deltasource.internship.hotelcalifornia.customexceptions.NullCommodityException;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -21,18 +23,18 @@ public class Room {
 	private Set<AbstractCommodity> commodities;
 	private Set<LocalDate> maintenanceDates;
 	private Set<Booking> bookings;
-	private int numberOfBeds;
+	private int capacity;
 
 	/**
 	 * Only constructor of the Room class
+	 * Call setter method for the commodities
 	 * Call setter method for the room number
-	 * Initializes the maintenanceDates and bookings hashsets
+	 * Initializes the maintenanceDates and bookings hash sets
 	 *
 	 * @param number      room number
 	 * @param commodities The commodities belonging to the room
 	 */
 	public Room(int number, Set<AbstractCommodity> commodities) {
-		this.commodities = new HashSet<>();
 		setCommodities(commodities);
 		setNumber(number);
 		maintenanceDates = new HashSet<>();
@@ -69,27 +71,52 @@ public class Room {
 		return number;
 	}
 
+	public int getCapacity() {
+		return capacity;
+	}
+
 	/**
 	 * Adds the commodities one by one
 	 * while checking if the current is bed
 	 * and adding to the total room capacity
 	 *
-	 * @param commodities
-	 * @throws InvalidHotelActionException if the commodities passed
-	 *                                     as argument are null
+	 * @param commodities the set of commodities to be assigned
+	 * @throws NullCommodityException if the commodities passed
+	 *                                as argument are null
 	 */
 	public void setCommodities(Set<AbstractCommodity> commodities) {
 		if (commodities == null) {
-			throw new InvalidHotelActionException("Cannot set 0 commodities");
+			throw new NullCommodityException("Cannot set 0 commodities to a room");
 		}
-		this.commodities.clear();
-		numberOfBeds = 0;
+		this.commodities = new HashSet<>();
+		capacity = 0;
 		for (AbstractCommodity commodity : commodities) {
 			this.commodities.add(commodity);
 			if (commodity instanceof Bed) {
 				Bed bed = (Bed) commodity;
-				numberOfBeds += bed.getBedType().getSize();
+				capacity += bed.getBedType().getSize();
 			}
+		}
+	}
+
+	/**
+	 * Adds commodity to the existing set
+	 * If commodity happens to be bed -
+	 * it increments the capacity by the
+	 * bed size
+	 *
+	 * @param commodity the commodity to be added to the set
+	 * @throws InvalidHotelActionException When trying
+	 *                                     to pass a null reference
+	 */
+	public void addCommodity(AbstractCommodity commodity) {
+		if (commodity == null) {
+			throw new NullCommodityException("Cannot add null commodity");
+		}
+		this.commodities.add(commodity);
+		if (commodity instanceof Bed) {
+			Bed bed = (Bed) commodity;
+			capacity += bed.getBedType().getSize();
 		}
 	}
 
@@ -141,7 +168,7 @@ public class Room {
 				return;
 			}
 		}
-		throw new InvalidHotelActionException("No such booking exists!");
+		throw new BookingActionException("Can't remove booking! No such booking exists!");
 	}
 
 	/**
@@ -151,8 +178,8 @@ public class Room {
 	 * is within an existing booking or if the two
 	 * dates coincide with those of a booking
 	 *
-	 * @param fromDate
-	 * @param toDate
+	 * @param fromDate date the stay starts
+	 * @param toDate   date the stay ends
 	 * @return true if it is booked
 	 * false if it is vacant
 	 * false if there are no bookings
@@ -179,15 +206,14 @@ public class Room {
 	 * to the interval - so we have a proper list
 	 * in the end
 	 *
-	 * @param fromDate     check from date
-	 * @param toDate       check to date
-	 * @param numberOfBeds how many beds in the room
+	 * @param fromDate check from date
+	 * @param toDate   check to date
+	 * @param capacity bed capacity in the room
 	 * @return the list of the dates - can be empty if no available dates
 	 * found or the number of beds does not correspond to the wanted one
 	 */
-
-	public List<LocalDate> findAvailableDatesForIntervalAndSize(LocalDate fromDate, LocalDate toDate, int numberOfBeds) {
-		if (!checkIfEnoughBeds(numberOfBeds)) {
+	public List<LocalDate> findAvailableDatesForIntervalAndSize(LocalDate fromDate, LocalDate toDate, int capacity) {
+		if (!checkIfEnoughBeds(capacity)) {
 			return new ArrayList<>();
 		}
 
@@ -216,12 +242,12 @@ public class Room {
 	 * beds matches the actual number of
 	 * beds in the room
 	 *
-	 * @param numberOfBeds requested number of beds
+	 * @param capacity requested bed capacity
 	 * @return true - if the numbers match
 	 * false - if they don't
 	 */
-	public boolean checkIfEnoughBeds(int numberOfBeds) {
-		return this.numberOfBeds == numberOfBeds;
+	public boolean checkIfEnoughBeds(int capacity) {
+		return this.capacity == capacity;
 	}
 
 	@Override
