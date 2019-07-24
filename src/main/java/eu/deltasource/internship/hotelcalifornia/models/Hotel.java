@@ -17,7 +17,8 @@ import java.util.*;
  */
 public class Hotel {
 	private static final List<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
-	private static Map<AbstractCommodity, Room> COMMODITY_ROOM_MAP = new HashMap<>();
+	private static final Map<AbstractCommodity, Room> COMMODITY_ROOM_MAP = new HashMap<>();
+	private static final Set<AbstractCommodity> AVAILABLE_COMMODITIES_SET = new HashSet<>();
 	private static final String UNKNOWN_NAME = "unknown";
 	private String name;
 	private List<Room> rooms;
@@ -56,6 +57,10 @@ public class Hotel {
 
 	public static Map<AbstractCommodity, Room> getCommodityRoomMap() {
 		return COMMODITY_ROOM_MAP;
+	}
+
+	public static Set<AbstractCommodity> getAvailableCommoditiesSet() {
+		return AVAILABLE_COMMODITIES_SET;
 	}
 
 	/**

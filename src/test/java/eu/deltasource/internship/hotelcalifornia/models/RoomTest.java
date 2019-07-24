@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RoomTest {
@@ -166,9 +166,16 @@ class RoomTest {
 
 	@Test
 	void setCommoditiesShouldWorkIfProperArgumentPassed() {
+		//Given
 		Set<AbstractCommodity> newCommoditySet = new HashSet<>(Arrays.asList(new Shower(), new Bed(BedType.DOUBLE)));
+
+		//When
 		room.setCommodities(newCommoditySet);
+
+		//Then
 		assertEquals(newCommoditySet, room.getCommodities());
+		assertThat("The available commodities set still contains the added ones.",
+			Hotel.getAvailableCommoditiesSet(),	not(containsInAnyOrder(newCommoditySet)));
 	}
 
 	@Test
@@ -186,6 +193,8 @@ class RoomTest {
 
 		//Then
 		assertTrue(room.getCommodities().contains(shower));
+		assertEquals(room, Hotel.getCommodityRoomMap().get(shower));
+		assertFalse(Hotel.getAvailableCommoditiesSet().contains(shower));
 	}
 
 	@Test
@@ -225,6 +234,8 @@ class RoomTest {
 		assertFalse(room.getCommodities().contains(bed));
 		assertFalse(Hotel.getCommodityRoomMap().containsKey(bed));
 		assertEquals(initialCapacity - bed.getBedType().getSize(), room.getCapacity());
+		assertTrue(Hotel.getAvailableCommoditiesSet().contains(bed));
+		assertFalse(Hotel.getCommodityRoomMap().containsKey(bed));
 	}
 
 	@Test

@@ -2,7 +2,6 @@ package eu.deltasource.internship.hotelcalifornia.models;
 
 import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 import eu.deltasource.internship.hotelcalifornia.commodities.*;
-import eu.deltasource.internship.hotelcalifornia.customexceptions.NullCommodityException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ class HotelTest {
 	@AfterEach
 	void tearDown() {
 		hotel.getRooms().clear();
-		hotel.getCommodityRoomMap().clear();
+		Hotel.getCommodityRoomMap().clear();
 	}
 
 	@Test

@@ -32,12 +32,6 @@ class ManagerTest {
 
 	@Test
 	void setHotelShouldWorkIfActualHotelPassed() {
-		//Given
-		manager = new Manager("Velkushanov");
-
-		//When
-
-		//Then
 		assertDoesNotThrow(() -> manager.setHotel(hotel));
 	}
 
@@ -48,7 +42,7 @@ class ManagerTest {
 
 	@Test
 	void bookThreeRooms() {
-		//given
+		//When
 		Set<AbstractCommodity> firstRoomCommodities = new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE),
 			new Shower(), new Toilet()));
 
@@ -62,7 +56,7 @@ class ManagerTest {
 		hotel.addRoom(new Room(102, secondRoomCommodities));
 		hotel.addRoom(new Room(103, thirdRoomCommodities));
 
-
+		//Then
 		assertDoesNotThrow(() -> manager.createBooking(LocalDate.of(2019, 7, 20),
 			LocalDate.of(2019, 7, 25), 2, 1234567899L));
 

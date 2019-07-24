@@ -112,14 +112,14 @@ public class Room {
 
 	/**
 	 * If the commodity already belongs to the
-	 * room - does nothing. Else it frees up
+	 * room - does nothing. Else, it frees up
 	 * the commodity (removes it from commodityRoomMap)
 	 * and adds commodity to the existing set
 	 * and respectively to the map of the hotel class
 	 * with object value being the current room
 	 * If commodity happens to be bed -
 	 * it increments the capacity by the
-	 * bed size
+	 * bed size. Removes commodity from the set of available ones.
 	 *
 	 * @param commodity the commodity to be added to the set
 	 * @throws NullCommodityException When trying
@@ -135,13 +135,14 @@ public class Room {
 				return;
 			}
 		}
-		removeCommodity(commodity);
+		Hotel.getCommodityRoomMap().remove(commodity);
 		this.commodities.add(commodity);
 		if (commodity instanceof Bed) {
 			Bed bed = (Bed) commodity;
 			capacity += bed.getBedType().getSize();
 		}
 		Hotel.getCommodityRoomMap().put(commodity, this);
+		Hotel.getAvailableCommoditiesSet().remove(commodity);
 	}
 
 	/**
@@ -149,6 +150,7 @@ public class Room {
 	 * set and the hash map in the hotel
 	 * and decreases the capacity of the
 	 * room if the commodity is bed
+	 * Adds commodity to the set of available ones.
 	 *
 	 * @param commodity the commodity to be removed
 	 * @throws NullCommodityException when trying to pass
@@ -165,6 +167,7 @@ public class Room {
 				capacity -= bed.getBedType().getSize();
 			}
 			Hotel.getCommodityRoomMap().remove(commodity);
+			Hotel.getAvailableCommoditiesSet().add(commodity);
 		}
 	}
 
