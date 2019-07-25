@@ -5,6 +5,7 @@ import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelAc
 import eu.deltasource.internship.hotelcalifornia.commodities.AbstractCommodity;
 import eu.deltasource.internship.hotelcalifornia.commodities.Bed;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.NullCommodityException;
+import eu.deltasource.internship.hotelcalifornia.services.HotelService;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class Room {
 	private int number;
-	private Set<AbstractCommodity> commodities;
+	private Set<AbstractCommodity> commodities = new HashSet<>();
 	private Set<LocalDate> maintenanceDates;
 	private Set<Booking> bookings;
 	private int capacity;
@@ -61,10 +62,7 @@ public class Room {
 	 * @param number number of the room to be set
 	 */
 	public void setNumber(int number) {
-		if (!Hotel.getTakenRoomNumbers().contains(number)) {
-			this.number = number;
-			Hotel.getTakenRoomNumbers().add(number);
-		}
+		this.number = HotelService.getRoomNumberIfValid(number);
 	}
 
 	public int getNumber() {
@@ -76,33 +74,21 @@ public class Room {
 	}
 
 	/**
-	 * Initializes the hash map of commodities
-	 * if it is not already
 	 * First removes the passed set of commodities
-	 * from the hash map in the hotel
-	 * in case any of it belong to another room
+	 * from the hash map in the hotel and from
+	 * the rooms they belong to
 	 * Removes the current commodities
-	 * of the room from the hash map in the Hotel
+	 * of the room from the hash map in the HotelService
 	 * and from the set of the room object
 	 * and then adds the new commodities one by one
 	 *
 	 * @param commodities the set of commodities to be assigned
-	 * @throws NullCommodityException if the commodities passed
-	 *                                as argument are null
 	 */
 	public void setCommodities(Set<AbstractCommodity> commodities) {
 		if (commodities == null) {
 			throw new NullCommodityException("Cannot set 0 commodities to a room");
 		}
-		if (this.commodities == null) {
-			this.commodities = new HashSet<>();
-		}
-		for (AbstractCommodity commodity : commodities) {
-			Hotel.getCommodityRoomMap().remove(commodity);
-		}
-		for (AbstractCommodity commodity : this.commodities) {
-			Hotel.getCommodityRoomMap().remove(commodity);
-		}
+		HotelService.prepareCommoditiesForRoom(commodities, this);
 		this.commodities.clear();
 		this.capacity = 0;
 		for (AbstractCommodity commodity : commodities) {
@@ -112,14 +98,13 @@ public class Room {
 
 	/**
 	 * If the commodity already belongs to the
-	 * room - does nothing. Else, it frees up
-	 * the commodity (removes it from commodityRoomMap)
-	 * and adds commodity to the existing set
-	 * and respectively to the map of the hotel class
-	 * with object value being the current room
+	 * room - does nothing. Else, it adds the
+	 * commodity with the new value in the hash map
+	 * of Hotel service and removes it from the set
+	 * of available ones
 	 * If commodity happens to be bed -
 	 * it increments the capacity by the
-	 * bed size. Removes commodity from the set of available ones.
+	 * bed size.
 	 *
 	 * @param commodity the commodity to be added to the set
 	 * @throws NullCommodityException When trying
@@ -129,27 +114,23 @@ public class Room {
 		if (commodity == null) {
 			throw new NullCommodityException("Cannot add null commodity");
 		}
-		if (Hotel.getCommodityRoomMap().containsKey(commodity)) {
-			Room currentRoom = Hotel.getCommodityRoomMap().get(commodity);
-			if (currentRoom != null && currentRoom.equals(this)) {
-				return;
-			}
+		if (this.equals(HotelService.getCommodityLocation(commodity))) {
+			return;
 		}
-		Hotel.getCommodityRoomMap().remove(commodity);
 		this.commodities.add(commodity);
 		if (commodity instanceof Bed) {
 			Bed bed = (Bed) commodity;
 			capacity += bed.getBedType().getSize();
 		}
-		Hotel.getCommodityRoomMap().put(commodity, this);
-		Hotel.getAvailableCommoditiesSet().remove(commodity);
+		HotelService.addCommodityToRoom(commodity, this);
 	}
 
 	/**
-	 * Removes commodity from the existing
-	 * set and the hash map in the hotel
+	 * Removes commodity from the set of
+	 * commodities belonging to the room
 	 * and decreases the capacity of the
-	 * room if the commodity is bed
+	 * room if the commodity is bed.
+	 * Removes commodity from the hash map in HotelService
 	 * Adds commodity to the set of available ones.
 	 *
 	 * @param commodity the commodity to be removed
@@ -166,8 +147,7 @@ public class Room {
 				Bed bed = (Bed) commodity;
 				capacity -= bed.getBedType().getSize();
 			}
-			Hotel.getCommodityRoomMap().remove(commodity);
-			Hotel.getAvailableCommoditiesSet().add(commodity);
+			HotelService.makeCommodityAvailable(commodity);
 		}
 	}
 
@@ -223,66 +203,93 @@ public class Room {
 	}
 
 	/**
+	 * Removes booking from the hashset
+	 * Prepares commodities after the guests leave
+	 *
+	 * @param bookingNumber unique number of the booking
+	 * @param guestId       to date
+	 * @throws InvalidHotelActionException if a booking with the those arguments
+	 *                                     does not exist
+	 */
+	public void removeBooking(int bookingNumber, long guestId) {
+		for (Booking booking : bookings) {
+			if (booking.getGuestId() == guestId) {
+				if (booking.getBookingNumber() == bookingNumber) {
+					bookings.remove(booking);
+					prepareCommodities(booking.getToDate());
+					return;
+				}
+			}
+		}
+		throw new BookingActionException("Can't remove booking! Try different parameters!");
+	}
+
+	/**
 	 * Checks if room is booked
 	 * for a specified interval
-	 * It' considered booked if the from or to date
-	 * is within an existing booking or if the two
-	 * dates coincide with those of a booking
+	 * It' considered vacant if the from date is
+	 * after or equal to the to booking's to date
+	 * or the to date is before of equal to the
+	 * booking's from date
 	 *
 	 * @param fromDate date the stay starts
 	 * @param toDate   date the stay ends
 	 * @return true if it is booked
 	 * false if it is vacant
 	 * false if there are no bookings
+	 * @throws InvalidHotelActionException if the dates passed are not chronological
 	 */
 	public boolean checkIfBooked(LocalDate fromDate, LocalDate toDate) {
+		if(!HotelService.checkIfDatesChronological(fromDate,toDate)){
+			throw new InvalidHotelActionException("Dates passed as arguments are not chronological");
+		}
 		if (bookings.isEmpty()) {
 			return false;
 		}
-
-		for (Booking booking : bookings) {
-			if ((fromDate.isAfter(booking.getFromDate()) && fromDate.isBefore(booking.getToDate()))
-				|| (toDate.isAfter(booking.getFromDate()) && toDate.isBefore((booking.getToDate())))
-				|| (fromDate.equals(booking.getFromDate()) || toDate.equals((booking.getToDate())))) {
-				return true;
+		for(Booking booking: bookings){
+			if(!fromDate.isBefore(booking.getToDate()) || !toDate.isAfter(booking.getFromDate())){
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/**
 	 * Gets the list of available dates of a room
 	 * If no bookings - returns all dates
-	 * Adds or removes the date if it belongs
-	 * to the interval - so we have a proper list
-	 * in the end
+	 * Get all dates that have bookings
+	 * Add every date that the room is free for
+	 *
 	 *
 	 * @param fromDate check from date
 	 * @param toDate   check to date
 	 * @param capacity bed capacity in the room
 	 * @return the list of the dates - can be empty if no available dates
 	 * found or the number of beds does not correspond to the wanted one
+	 * @throws InvalidHotelActionException if the dates passed are not chronological
 	 */
 	public List<LocalDate> findAvailableDatesForIntervalAndSize(LocalDate fromDate, LocalDate toDate, int capacity) {
+		if(!HotelService.checkIfDatesChronological(fromDate, toDate)){
+			throw new InvalidHotelActionException("Dates passed as arguments are not chronological");
+		}
+
 		if (!checkIfEnoughBeds(capacity)) {
 			return new ArrayList<>();
 		}
 
 		if (bookings.isEmpty()) {
-			List<LocalDate> allDates = fromDate.datesUntil(toDate).collect(Collectors.toList());
-			allDates.add(toDate);
-			return allDates;
+			return fromDate.datesUntil(toDate.plusDays(1)).collect(Collectors.toList());
+		}
+
+		List<LocalDate> bookedDates = new ArrayList<>();
+		for (Booking booking : bookings) {
+			bookedDates.addAll(booking.getFromDate().datesUntil(booking.getToDate()).collect(Collectors.toList()));
 		}
 
 		List<LocalDate> availableDates = new ArrayList<>();
-		for (Booking booking : bookings) {
-			for (LocalDate currentDate = fromDate; !currentDate.isAfter(toDate); currentDate = currentDate.plusDays(1)) {
-				if (currentDate.equals(booking.getToDate()) || currentDate.isAfter(booking.getToDate())
-					|| currentDate.isBefore(booking.getFromDate())) {
-					availableDates.add(currentDate);
-				} else {
-					availableDates.remove(currentDate);
-				}
+		for (LocalDate currentDate = fromDate; !currentDate.isAfter(toDate); currentDate = currentDate.plusDays(1)) {
+			if(!bookedDates.contains(currentDate)){
+				availableDates.add(currentDate);
 			}
 		}
 		return availableDates;

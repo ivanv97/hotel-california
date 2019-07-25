@@ -1,8 +1,7 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
-import eu.deltasource.internship.hotelcalifornia.commodities.AbstractCommodity;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
-import eu.deltasource.internship.hotelcalifornia.customexceptions.NullCommodityException;
+import eu.deltasource.internship.hotelcalifornia.utilities.HotelUtil;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -16,12 +15,8 @@ import java.util.*;
  * @author Ivan Velkushanov
  */
 public class Hotel {
-	private static final List<Integer> TAKEN_ROOM_NUMBERS = new ArrayList<>();
-	private static final Map<AbstractCommodity, Room> COMMODITY_ROOM_MAP = new HashMap<>();
-	private static final Set<AbstractCommodity> AVAILABLE_COMMODITIES_SET = new HashSet<>();
-	private static final String UNKNOWN_NAME = "unknown";
 	private String name;
-	private List<Room> rooms;
+	private Map<Integer, Room> rooms;
 
 	/**
 	 * Constructor with arguments
@@ -30,7 +25,7 @@ public class Hotel {
 	 * @param name  <b>name</b> of the hotel
 	 * @param rooms an array list consisting of all of the <b>rooms</b>z
 	 */
-	public Hotel(String name, List<Room> rooms) {
+	public Hotel(String name, Map<Integer, Room> rooms) {
 		this.name = name;
 		this.rooms = rooms;
 	}
@@ -40,7 +35,7 @@ public class Hotel {
 	 * default values
 	 */
 	public Hotel() {
-		this(UNKNOWN_NAME, new ArrayList<>());
+		this(HotelUtil.getUnknownName(), new HashMap<>());
 	}
 
 	public String getName() {
@@ -51,16 +46,8 @@ public class Hotel {
 		this.name = name;
 	}
 
-	public List<Room> getRooms() {
+	public Map<Integer, Room> getRooms() {
 		return rooms;
-	}
-
-	public static Map<AbstractCommodity, Room> getCommodityRoomMap() {
-		return COMMODITY_ROOM_MAP;
-	}
-
-	public static Set<AbstractCommodity> getAvailableCommoditiesSet() {
-		return AVAILABLE_COMMODITIES_SET;
 	}
 
 	/**
@@ -69,20 +56,9 @@ public class Hotel {
 	 * the method fails
 	 *
 	 * @param room the new room to be added
-	 * @throws InvalidHotelActionException when we try to add
-	 *                                     the same room twice
 	 */
 	public void addRoom(Room room) {
-		for (Room currentRoom : rooms) {
-			if (currentRoom.equals(room)) {
-				throw new InvalidHotelActionException("Cannot have room with the same number");
-			}
-		}
-		rooms.add(room);
-	}
-
-	public static List<Integer> getTakenRoomNumbers() {
-		return TAKEN_ROOM_NUMBERS;
+		rooms.put(room.getNumber(), room);
 	}
 
 	/**
@@ -91,21 +67,14 @@ public class Hotel {
 	 *
 	 * @param fromDate     check from date
 	 * @param toDate       check to date
-	 * @param numberOfDays for number of days
 	 * @param numberOfBeds for number of people
 	 * @return returns map consisting only of rooms
 	 * which are found to be vacant in at least one
 	 * date of the specified interval
-	 * @throws InvalidHotelActionException if the number of days does not
-	 *                                     correspond with the specified interval
 	 */
-	public Map<Room, AvailableDatesList> getFreeRoomsAndDates(LocalDate fromDate, LocalDate toDate,
-															  int numberOfDays, int numberOfBeds) {
-		if (numberOfDays != (toDate.getDayOfYear() - fromDate.getDayOfYear())) {
-			throw new InvalidHotelActionException("Number of days does not correspond with selected dates!");
-		}
+	public Map<Room, AvailableDatesList> getFreeDatesByRoom(LocalDate fromDate, LocalDate toDate, int numberOfBeds) {
 		Map<Room, AvailableDatesList> availableRoomsAndDates = new HashMap<>();
-		for (Room room : rooms) {
+		for (Room room : rooms.values()) {
 			List<LocalDate> availableDates = room.findAvailableDatesForIntervalAndSize(fromDate, toDate, numberOfBeds);
 			if (!availableDates.isEmpty()) {
 				availableRoomsAndDates.put(room, new AvailableDatesList(availableDates));
@@ -133,7 +102,7 @@ public class Hotel {
 	public List<Room> findAvailableRooms(LocalDate fromDate, LocalDate toDate, int numberOfPeople) {
 		List<Room> availableRooms = new ArrayList<>();
 		if (toDate.isAfter(fromDate)) {
-			for (Room room : rooms) {
+			for (Room room : rooms.values()) {
 				if (!room.checkIfBooked(fromDate, toDate)) {
 					if (room.checkIfEnoughBeds(numberOfPeople)) {
 						availableRooms.add(room);

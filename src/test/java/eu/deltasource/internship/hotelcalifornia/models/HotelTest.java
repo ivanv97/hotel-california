@@ -2,6 +2,8 @@ package eu.deltasource.internship.hotelcalifornia.models;
 
 import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 import eu.deltasource.internship.hotelcalifornia.commodities.*;
+import eu.deltasource.internship.hotelcalifornia.services.HotelService;
+import eu.deltasource.internship.hotelcalifornia.utilities.HotelUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class HotelTest {
 	private static final LocalDate FROM_DATE = LocalDate.of(2019, 7, 19);
 	private static final LocalDate TO_DATE = LocalDate.of(2019, 7, 20);
-	private static final int NUMBER_OF_DAYS = 1;
 	private static final int ROOM_CAPACITY = 1;
 	private static final long GUEST_ID = 1234567895L;
 	private Set<AbstractCommodity> roomCommodities = new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE),
@@ -24,13 +25,13 @@ class HotelTest {
 
 	@BeforeEach
 	void setUp() {
-		hotel = new Hotel("California", new ArrayList<>(Arrays.asList(room)));
+		hotel = new Hotel("California", new HashMap<>());
+		hotel.getRooms().put(room.getNumber(), room);
 	}
 
 	@AfterEach
 	void tearDown() {
-		hotel.getRooms().clear();
-		Hotel.getCommodityRoomMap().clear();
+		HotelService.getCommodityRoomMap().clear();
 	}
 
 	@Test
@@ -38,7 +39,7 @@ class HotelTest {
 		//when
 		Hotel hotelWithNull = new Hotel();
 		//then
-		assertEquals("unknown", hotelWithNull.getName());
+		assertEquals(HotelUtil.getUnknownName(), hotelWithNull.getName());
 		assertTrue(hotelWithNull.getRooms().isEmpty());
 	}
 
@@ -50,39 +51,31 @@ class HotelTest {
 	}
 
 	@Test
-	void getFreeRoomsAndDatesShouldThrowExIfDayNumberIsNotValid() {
+	void getFreeDatesByRoomShouldReturnEmptyListIfNotEnoughBeds() {
 		//then
-		assertThrows(InvalidHotelActionException.class,
-			() -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS + 4, ROOM_CAPACITY));
+		assertThrows(InvalidHotelActionException.class, () -> hotel.getFreeDatesByRoom(FROM_DATE, TO_DATE, ROOM_CAPACITY + 1));
 	}
 
 	@Test
-	void getFreeRoomsAndDatesShouldReturnEmptyListIfNotEnoughBeds() {
-		//then
-		assertThrows(InvalidHotelActionException.class, () -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS,
-			ROOM_CAPACITY + 1));
-	}
-
-	@Test
-	void getFreeRoomsAndDatesShouldWorkIfAvailableDates() {
+	void getFreeDatesByRoomShouldWorkIfAvailableDates() {
 		//when
 		room.createBooking(FROM_DATE.plusDays(1), TO_DATE.plusDays(2), GUEST_ID);
-		Map<Room, AvailableDatesList> roomsAndDates = hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ROOM_CAPACITY);
+		Map<Room, AvailableDatesList> roomsAndDates = hotel.getFreeDatesByRoom(FROM_DATE, TO_DATE, ROOM_CAPACITY);
 
 		//then
-		assertDoesNotThrow(() -> hotel.getFreeRoomsAndDates(FROM_DATE, TO_DATE, NUMBER_OF_DAYS, ROOM_CAPACITY));
+		assertDoesNotThrow(() -> hotel.getFreeDatesByRoom(FROM_DATE, TO_DATE, ROOM_CAPACITY));
 		assertTrue(roomsAndDates.get(room).getAvailableDates().contains(FROM_DATE));
 		assertEquals(1, roomsAndDates.get(room).getAvailableDates().size());
 	}
 
 	@Test
-	void getFreeRoomsAndDatesShouldThrowExceptionIfNoAvailableDates() {
+	void getFreeDatesByRoomShouldThrowExceptionIfNoAvailableDates() {
 		//Given
 		room.createBooking(FROM_DATE.minusDays(9), TO_DATE.plusDays(2), GUEST_ID);
 
 		//When
-		assertThrows(InvalidHotelActionException.class, () -> hotel.getFreeRoomsAndDates(FROM_DATE,
-			TO_DATE.plusDays(1), NUMBER_OF_DAYS + 1, ROOM_CAPACITY));
+		assertThrows(InvalidHotelActionException.class, () -> hotel.getFreeDatesByRoom(FROM_DATE,
+			TO_DATE.plusDays(1), ROOM_CAPACITY));
 	}
 
 	@Test
@@ -134,11 +127,6 @@ class HotelTest {
 
 		//Then
 		assertDoesNotThrow(() -> hotel.addRoom(room1));
-	}
-
-	@Test
-	void addRoomShouldThrowExcWhenAddingTheSameRoom() {
-		assertThrows(InvalidHotelActionException.class, () -> hotel.addRoom(room));
 	}
 
 	@Test

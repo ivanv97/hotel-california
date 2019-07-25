@@ -1,6 +1,6 @@
 package eu.deltasource.internship.hotelcalifornia.commodities;
 
-import eu.deltasource.internship.hotelcalifornia.models.Hotel;
+import eu.deltasource.internship.hotelcalifornia.services.CommodityService;
 
 /**
  * Base class for concrete commodities
@@ -10,11 +10,10 @@ import eu.deltasource.internship.hotelcalifornia.models.Hotel;
  * @author Ivan Velkushanov
  */
 public abstract class AbstractCommodity {
-	public static int lastNumberUsed;
 	public final int inventoryNumber;
 
 	public AbstractCommodity() {
-		inventoryNumber = ++lastNumberUsed;
+		inventoryNumber = CommodityService.getCommodityNumber();
 	}
 
 	public abstract void prepare();

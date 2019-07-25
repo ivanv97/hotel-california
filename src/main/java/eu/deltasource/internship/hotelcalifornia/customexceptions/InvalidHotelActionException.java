@@ -10,4 +10,8 @@ public class InvalidHotelActionException extends RuntimeException {
 	public InvalidHotelActionException(String message) {
 		super(message);
 	}
+
+	public InvalidHotelActionException() {
+		this("Invalid hotel action!");
+	}
 }

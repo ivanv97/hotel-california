@@ -76,16 +76,10 @@ public class Manager {
 	 * @param roomNumber booking should be in this room
 	 * @return the number of the room if
 	 * its booking was successfully removed
-	 * @throws BookingActionException when a booking
-	 *                                was not found for the given arguments
+	 * @throws BookingActionException removeBooking of room class can throw exc
+	 *                                when a booking was not found for the given arguments
 	 */
-	public int removeBooking(LocalDate fromDate, LocalDate toDate, int roomNumber) {
-		for (Room room : hotel.getRooms()) {
-			if (room.getNumber() == roomNumber) {
-				room.removeBooking(fromDate, toDate);
-				return roomNumber;
-			}
-		}
-		throw new BookingActionException("No such booking for the specified room number!");
+	public void removeBooking(LocalDate fromDate, LocalDate toDate, int roomNumber) {
+		hotel.getRooms().get(roomNumber).removeBooking(fromDate, toDate);
 	}
 }

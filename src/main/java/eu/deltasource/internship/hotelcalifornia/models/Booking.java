@@ -1,6 +1,9 @@
 package eu.deltasource.internship.hotelcalifornia.models;
 
 import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
+import eu.deltasource.internship.hotelcalifornia.services.BookingService;
+import eu.deltasource.internship.hotelcalifornia.services.HotelService;
+import eu.deltasource.internship.hotelcalifornia.utilities.HotelUtil;
 
 import java.time.LocalDate;
 
@@ -13,8 +16,6 @@ import java.time.LocalDate;
  * @author Ivan Velkushanov
  */
 public class Booking {
-	private static final String UNKNOWN_NAME = "unknown";
-	private static int lastNumberUsed;
 	private final int bookingNumber;
 	private LocalDate fromDate;
 	private LocalDate toDate;
@@ -32,7 +33,7 @@ public class Booking {
 	 * @param guestId  EGN
 	 */
 	public Booking(LocalDate fromDate, LocalDate toDate, long guestId) {
-		this(fromDate, toDate, UNKNOWN_NAME, guestId);
+		this(fromDate, toDate, HotelUtil.getUnknownName(), guestId);
 	}
 
 	/**
@@ -49,7 +50,7 @@ public class Booking {
 		this.guestName = guestName;
 		changeReservationDates(fromDate, toDate);
 		setGuestId(guestId);
-		bookingNumber = ++lastNumberUsed;
+		bookingNumber = BookingService.getBookingNumber();
 	}
 
 	public LocalDate getFromDate() {
@@ -99,11 +100,9 @@ public class Booking {
 	 * @param toDate   the new final date
 	 */
 	public void changeReservationDates(LocalDate fromDate, LocalDate toDate) {
-		if (fromDate != null && toDate != null) {
-			if (toDate.isAfter(fromDate)) {
-				this.fromDate = fromDate;
-				this.toDate = toDate;
-			}
+		if (HotelService.checkIfDatesChronological(fromDate, toDate)) {
+			this.fromDate = fromDate;
+			this.toDate = toDate;
 		}
 	}
 

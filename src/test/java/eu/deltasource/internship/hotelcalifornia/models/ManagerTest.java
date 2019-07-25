@@ -3,6 +3,7 @@ package eu.deltasource.internship.hotelcalifornia.models;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.BookingActionException;
 import eu.deltasource.internship.hotelcalifornia.customexceptions.InvalidHotelActionException;
 import eu.deltasource.internship.hotelcalifornia.commodities.*;
+import eu.deltasource.internship.hotelcalifornia.services.HotelService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,13 +22,13 @@ class ManagerTest {
 		hotel = new Hotel();
 		manager = new Manager("Ivan");
 		manager.setHotel(hotel);
-		Hotel.getTakenRoomNumbers().clear();
+		HotelService.getTakenRoomNumbers().clear();
 	}
 
 	@AfterEach
 	void tearDown() {
 		hotel.getRooms().clear();
-		Hotel.getTakenRoomNumbers().clear();
+		HotelService.getTakenRoomNumbers().clear();
 	}
 
 	@Test
@@ -130,20 +131,4 @@ class ManagerTest {
 		assertThrows(BookingActionException.class, () -> manager.removeBooking(LocalDate.of(2020, 1, 1),
 			LocalDate.of(2020, 1, 3), 101));
 	}
-
-	@Test
-	void removeBookingShouldThrowExcIfRoomNumberNotExisting() {
-		//Given
-		Room room = new Room(101, new HashSet<>(Arrays.asList(new Bed(BedType.SINGLE))));
-		hotel.addRoom(room);
-
-		//When
-		room.createBooking(LocalDate.of(2020, 1, 1),
-			LocalDate.of(2020, 1, 2), 1234567891L);
-
-		//Then
-		assertThrows(BookingActionException.class, () -> manager.removeBooking(LocalDate.of(2020, 1, 1),
-			LocalDate.of(2020, 1, 2), 102));
-	}
-
 }
